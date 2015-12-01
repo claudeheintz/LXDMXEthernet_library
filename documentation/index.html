@@ -1,0 +1,23 @@
+<HTML>
+<HEAD>
+<TITLE>LXDMXEthernet_library</TITLE>
+<style type="text/css">p {font-size: 10pt; font-family: lucida grande, geneva, helvetica, arial, sans-serif; color: #00000f;} h3 {font-size: 19pt; font-family: lucida grande, geneva, helvetica, arial, sans-serif; color: #00000f;} h2 {font-size: 14pt; font-family: lucida grande, geneva, helvetica, arial, sans-serif; color: #00000f;}</style>
+</HEAD>
+<BODY>
+<H3>LXDMXEthernet_library</H3>
+<p>LXDMXEthernet encapsulates functionality for sending and receiving DMX over ethernet.<BR>
+It is a virtual class with concrete subclasses LXArtNet and LXSACN which specifically<BR>
+implement the Artistic Licence Art-Net and PLASA sACN 1.31 protocols.
+</p>
+<p>Note:  LXDMXEthernet_library requires<BR>
+Ethernet library used with the original Arduino Ethernet Shield<BR>
+For the Ethernet v2 shield, use LXDMXEthernet2_library along with Ethernet2 Library
+</p>
+<p>For multicast, EthernetUDP.h and EthernetUDP.cpp in the Ethernet library<BR>
+must be modified to add the beginMulticast method.<BR>
+See the code at the bottom of LXDMXEthernet.h
+</p>
+<H2><a href="LXArtNet_h/index.html">LXArtNet</a><BR>
+<a href="LXDMXEthernet_h/index.html">LXDMXEthernet</a><BR>
+<a href="LXSACN_h/index.html">LXSACN</a><BR><H2>
+</BODY>

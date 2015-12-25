@@ -49,8 +49,6 @@ TX |----------------------| 4 DI   Gnd 5 |---+------------ Pin 1
 //     #include <EthernetUDP2.h>
 #include <Ethernet.h>
 #include <EthernetUDP.h>
-// *** note if using  Arduino Ethernet Shield v2
-//     you must edit these three included files to change the included ethernet library as well
 #include <LXDMXEthernet.h>
 #include <LXArtNet.h>
 #include <LXSACN.h>
@@ -116,8 +114,12 @@ LXArduinoDMXOutput dmx_output(RXTX_PIN, DMX_MAX_SLOTS);
 
 // An EthernetUDP instance to let us send and receive packets over UDP
 EthernetUDP eUDP;
+
 // LXDMXEthernet instance ( created in setup so its possible to get IP if DHCP is used )
 LXDMXEthernet* interface;
+
+// sACN uses multicast, Art-Net uses broadcast. Both can be set to unicast (use_multicast = 0)
+uint8_t use_multicast = USE_SACN;
 
 //  used to toggle on and off the LED when DMX is Received
 int monitorstate = LOW;
@@ -153,23 +155,26 @@ void setup() {
     pinMode(SDSELECT_PIN, OUTPUT);
   #endif
 
-  if ( USE_DHCP ) {               // Initialize Ethernet
+  if ( USE_DHCP ) {                                          // Initialize Ethernet
     Ethernet.begin(mac);                                     // DHCP
   } else {
   	Ethernet.begin(mac, ip, gateway, gateway, subnet_mask);   // Static
   }
   
-  if ( USE_SACN ) {               // Initialize Interface
+  if ( USE_SACN ) {                       // Initialize Interface (defaults to first universe)
     interface = new LXSACN();
+    //interface->setUniverse(1);	         // for different universe, change this line and the multicast address below
   } else {
     interface = new LXArtNet(Ethernet.localIP(), Ethernet.subnetMask());
+    use_multicast = 0;
+    //((LXArtNet*)interface)->setSubnetUniverse(0, 0);  //for different subnet/universe, change this line
   }
   
-  #ifdef USE_MULTICAST              // Start listening for UDP on port
+  if ( use_multicast ) {                  // Start listening for UDP on port
     eUDP.beginMulticast(IPAddress(239,255,0,1), interface->dmxPort());
-  #else
+  } else {
     eUDP.begin(interface->dmxPort());
-  #endif
+  }
 
   dmx_output.start();
   

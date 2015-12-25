@@ -43,27 +43,33 @@ Adafruit_NeoPixel ring = Adafruit_NeoPixel(NUM_LEDS, PIN, NEO_GRB + NEO_KHZ800);
 // LXDMXEthernet instance ( created in setup so its possible to get IP if DHCP is used )
 LXDMXEthernet* interface;
 
+// sACN uses multicast, Art-Net uses broadcast. Both can be set to unicast (use_multicast = 0)
+uint8_t use_multicast = USE_SACN;
+
 
 //*********************** setup ***********************
 void setup() {
 
-  if ( USE_DHCP ) {               // Initialize Ethernet
+  if ( USE_DHCP ) {                                          // Initialize Ethernet
     Ethernet.begin(mac);                                     // DHCP
   } else {
   	Ethernet.begin(mac, ip, gateway, gateway, subnet_mask);   // Static
   }
   
-  if ( USE_SACN ) {               // Initialize Interface
+  if ( USE_SACN ) {                       // Initialize Interface (defaults to first universe)
     interface = new LXSACN();
+    //interface->setUniverse(1);	         // for different universe, change this line and the multicast address below
   } else {
     interface = new LXArtNet(Ethernet.localIP(), Ethernet.subnetMask());
+    use_multicast = 0;
+    //((LXArtNet*)interface)->setSubnetUniverse(0, 0);  //for different subnet/universe, change this line
   }
 
-#ifdef USE_MULTICAST              // Start listening for UDP on port
+  if ( use_multicast ) {                  // Start listening for UDP on port
     eUDP.beginMulticast(IPAddress(239,255,0,1), interface->dmxPort());
-#else
+  } else {
     eUDP.begin(interface->dmxPort());
-#endif
+  }
     
   ring.begin();                   // Initialize NeoPixel driver
   ring.show();

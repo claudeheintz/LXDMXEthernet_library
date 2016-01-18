@@ -1,40 +1,26 @@
-/* LXArduinoDMX.cpp
-   Copyright 2015 by Claude Heintz Design
-   see LXArduinoDMXUSART.h for license
------------------------------------------------------------------------------------
+/**************************************************************************/
+/*!
+    @file     LXUSARTDMX.cpp
+    @author   Claude Heintz
+    @license  BSD (see LXUSARTDMX.h)
+    @copyright 2015-2016 by Claude Heintz
 
-   The LXArduinoDMX library supports output and input of DMX using the USART
-   serial output of an Arduino's microcontroller.  With microcontrollers with a single
-   USART such as the AT328 used by an Arduino Uno, this means that the Serial library
-   conflicts with LXArduinoDMX and cannot be used.  Other chips have more than one
-   USART and can support both Serial and LXArduinoDMX by specifying that LXArduinoDMX uses
-   USART1 instead of USART0.
-   
-   This is the circuit for a simple unisolated DMX Shield
-   that could be used with LXArdunoDMX.  It uses a line driver IC
-   to convert the output from the Arduino to DMX:
+    DMX Driver for Arduino using USART.
 
- Arduino Pin
- |                         SN 75176 A or MAX 481CPA
- V                            _______________
-       |                      | 1      Vcc 8 |------(+5v)
-RX (0) |----------------------|              |                 DMX Output
-       |                 +----| 2        B 7 |---------------- Pin 2
-       |                 |    |              |
-   (2) |----------------------| 3 DE     A 6 |---------------- Pin 3
-       |                      |              |
-TX (1) |----------------------| 4 DI   Gnd 5 |---+------------ Pin 1
-       |                                         |
-       |                                       (GND)
+    @section  HISTORY
 
+    v1.0   First release
+    v1.1 - Consolidated input and output into single class
 */
-
+/**************************************************************************/
 #include "pins_arduino.h"
 #include "LXArduinoDMXUSART.h"
 #include <inttypes.h>
 #include <stdlib.h>
 #include <avr/interrupt.h>
 #include <avr/io.h>
+
+LXUSARTDMX LXSerialDMX;
 
 // ***************** define registers, flags and interrupts  ****************
 
@@ -136,8 +122,9 @@ TX (1) |----------------------| 4 DI   Gnd 5 |---+------------ Pin 1
     #define DMX_STATE_IDLE 3
 
 	//***** status is if interrupts are enabled and IO is active
-    #define ISR_DISABLED 0
-    #define ISR_ENABLED 1
+    #define ISR_DISABLED 			0
+    #define ISR_OUTPUT_ENABLED 	1
+    #define ISR_INPUT_ENABLED 	2
 
 // **************************** global data (can be accessed in ISR)  ***************
 
@@ -149,40 +136,39 @@ LXRecvCallback _shared_receive_callback = NULL;
 
 
 //************************************************************************************
-// ************************  LXArduinoDMXOutput member functions  ********************
+// ************************  LXUSARTDMXOutput member functions  ********************
 
-LXArduinoDMXOutput::LXArduinoDMXOutput ( void )
-{
-	//zero buffer including _dmxData[0] which is start code
+LXUSARTDMX::LXUSARTDMX ( void ) {
+	_direction_pin = DIRECTION_PIN_NOT_USED;	//optional
 	_shared_max_slots = DMX_MAX_SLOTS;
-	
-    for (int n=0; n<DMX_MAX_SLOTS+1; n++) {
-    	_dmxData[n] = 0;
-    }
-    _interrupt_status = ISR_DISABLED;
-}
-
-LXArduinoDMXOutput::LXArduinoDMXOutput ( uint8_t pin, uint16_t slots  )
-{
-	pinMode(pin, OUTPUT);
-	digitalWrite(pin, HIGH);
-	_shared_max_slots = slots;
+	_interrupt_status = ISR_DISABLED;
 	
 	//zero buffer including _dmxData[0] which is start code
     for (int n=0; n<DMX_MAX_SLOTS+1; n++) {
     	_dmxData[n] = 0;
     }
-    _interrupt_status = ISR_DISABLED;
 }
 
-LXArduinoDMXOutput::~LXArduinoDMXOutput ( void )
-{
+
+LXUSARTDMX::~LXUSARTDMX ( void ) {
     stop();
     _shared_dmx_data = NULL;
+    _shared_receive_callback = NULL;
 }
 
-void LXArduinoDMXOutput::start ( void ) {
-	if ( _interrupt_status != ISR_ENABLED ) {	//prevent messing up sequence if already started...
+//  ***** start *****
+//  sets up baud rate, bits and parity
+//  sets globals accessed in ISR
+//  enables transmission and tx interrupt
+
+void LXUSARTDMX::startOutput ( void ) {
+	if ( _direction_pin != DIRECTION_PIN_NOT_USED ) {
+		digitalWrite(_direction_pin, HIGH);
+	}
+	if ( _interrupt_status == ISR_INPUT_ENABLED ) {
+		stop();
+	}
+	if ( _interrupt_status == ISR_DISABLED ) {	//prevent messing up sequence if already started...
 		LXUCSRRH = (unsigned char)(((F_CLK + DMX_DATA_BAUD * 8L) / (DMX_DATA_BAUD * 16L) - 1)>>8);
 		LXUCSRRL = (unsigned char) ((F_CLK + DMX_DATA_BAUD * 8L) / (DMX_DATA_BAUD * 16L) - 1);
 		LXUCSRA &= ~BIT_2X_SPEED;
@@ -190,62 +176,125 @@ void LXArduinoDMXOutput::start ( void ) {
 		LXUDR = 0x0;     			//USART send register  
 		_shared_dmx_data = dmxData();                 
 		_shared_dmx_state = DMX_STATE_BREAK;
-	
+
 		LXUCSRC = FORMAT_8N2; 					//set length && stopbits (no parity)
 		LXUCSRB |= BIT_TX_ENABLE | BIT_TX_ISR_ENABLE;  //enable tx and tx interrupt
-		_interrupt_status = ISR_ENABLED;
+		_interrupt_status = ISR_OUTPUT_ENABLED;
 	}
 }
 
-void LXArduinoDMXOutput::stop ( void ) { 
-	LXUCSRB &= ~BIT_TX_ISR_ENABLE;  //disable tx interrupt
-	LXUCSRB &= ~BIT_TX_ENABLE;     //disable tx enable
+//  ***** start *****
+//  sets up baud rate, bits and parity
+//  sets globals accessed in ISR
+//  enables transmission and tx interrupt
+
+void LXUSARTDMX::startInput ( void ) {
+	if ( _direction_pin != DIRECTION_PIN_NOT_USED ) {
+		digitalWrite(_direction_pin, LOW);
+	}
+	if ( _interrupt_status == ISR_OUTPUT_ENABLED ) {
+		stop();
+	}
+	if ( _interrupt_status == ISR_DISABLED ) {	//prevent messing up sequence if already started...
+		LXUCSRRH = (unsigned char)(((F_CLK + DMX_DATA_BAUD * 8L) / (DMX_DATA_BAUD * 16L) - 1)>>8);
+		LXUCSRRL = (unsigned char) ((F_CLK + DMX_DATA_BAUD * 8L) / (DMX_DATA_BAUD * 16L) - 1);
+		LXUCSRA &= ~BIT_2X_SPEED;
+
+		_shared_dmx_data = dmxData();                 
+		_shared_dmx_state = DMX_STATE_IDLE;
+		_shared_dmx_slot = 0;
+	
+		LXUCSRC = FORMAT_8N2; 					//set length && stopbits (no parity)
+		LXUCSRB |= BIT_RX_ENABLE | BIT_RX_ISR_ENABLE;  //enable tx and tx interrupt
+		_interrupt_status = ISR_INPUT_ENABLED;
+	}
+}
+
+//  ***** stop *****
+//  disables interrupts
+
+void LXUSARTDMX::stop ( void ) { 
+	if ( _interrupt_status == ISR_OUTPUT_ENABLED ) {
+		LXUCSRB &= ~BIT_TX_ISR_ENABLE;  							//disable tx interrupt
+		LXUCSRB &= ~BIT_TX_ENABLE;     							//disable tx enable
+	} else if ( _interrupt_status == ISR_INPUT_ENABLED ) {
+		LXUCSRB &= ~BIT_RX_ISR_ENABLE;  							//disable rx interrupt
+		LXUCSRB &= ~BIT_RX_ENABLE;     							//disable rx enable	
+	}
 	_interrupt_status = ISR_DISABLED;
 }
 
-void LXArduinoDMXOutput::setMaxSlots (int slots) {
+void LXUSARTDMX::setDirectionPin( uint8_t pin ) {
+	_direction_pin = pin;
+	pinMode(_direction_pin, OUTPUT);
+}
+
+//  ***** setMaxSlots *****
+//  sets the number of slots sent per DMX frame
+//  defaults to 512 or DMX_MAX_SLOTS
+//  should be no less DMX_MIN_SLOTS slots
+//  the DMX standard specifies min break to break time no less than 1024 usecs
+//  at 44 usecs per slot ~= 24
+
+void LXUSARTDMX::setMaxSlots (int slots) {
 	_shared_max_slots = max(slots, DMX_MIN_SLOTS);
 }
 
-void LXArduinoDMXOutput::setSlot (int slot, uint8_t value) {
+//  ***** getSlot *****
+//  reads the value of a slot
+//  see buffering note for ISR below 
+
+uint8_t LXUSARTDMX::getSlot (int slot) {
+	return _dmxData[slot];
+}
+
+//  ***** setSlot *****
+//  sets the output value of a slot
+
+void LXUSARTDMX::setSlot (int slot, uint8_t value) {
 	_dmxData[slot] = value;
 }
 
-uint8_t* LXArduinoDMXOutput::dmxData(void) {
+//  ***** dmxData *****
+//  pointer to data buffer
+
+uint8_t* LXUSARTDMX::dmxData(void) {
 	return &_dmxData[0];
 }
 
-/*!
- * @discussion TX ISR (transmit interrupt service routine)
- *
- * this routine is called when USART transmission is complete
- *
- * what this does is to send the next byte
- *
- * when that byte is done being sent, the ISR is called again
- *
- * and the cycle repeats...
- *
- * until _shared_max_slots worth of bytes have been sent on succesive triggers of the ISR
- *
- * and then on the next ISR...
- *
- * the break/mark after break is sent at a different speed
- *
- * and then on the next ISR...
- *
- * the start code is sent
- *
- * and then on the next ISR...
- *
- * the next data byte is sent
- *
- * and the cycle repeats...
-*/
+//  ***** setDataReceivedCallback *****
+//  sets pointer to function that is called
+//  on the break after a frame has been received
+//  whatever happens in this function should be quick
+//  ie set a flag so that processing of the received data happens
+//  outside of the ISR.
+
+
+void LXUSARTDMX::setDataReceivedCallback(LXRecvCallback callback) {
+	_shared_receive_callback = callback;
+}
+
+
+//************************************************************************************
+// ************************ TX ISR (transmit interrupt service routine)  *************
+//
+// this routine is called when USART transmission is complete
+// what this does is to send the next byte
+// when that byte is done being sent, the ISR is called again
+// and the cycle repeats...
+// until _shared_max_slots worth of bytes have been sent on succesive triggers of the ISR
+// and then on the next ISR...
+// the break/mark after break is sent at a different speed
+// and then on the next ISR...
+// the start code is sent
+// and then on the next ISR...
+// the next data byte is sent
+// and the cycle repeats...
+
 
 ISR (LXUSART_TX_vect) {
 	switch ( _shared_dmx_state ) {
-	
+	   
 		case DMX_STATE_BREAK:
 			// set the slower baud rate and send the break
 			LXUCSRRH = (unsigned char)(((F_CLK + DMX_BREAK_BAUD * 8L) / (DMX_BREAK_BAUD * 16L) - 1)>>8);
@@ -277,87 +326,17 @@ ISR (LXUSART_TX_vect) {
 	}
 }
 
-//************************************************************************************
-// ********************** LXArduinoDMXInput member functions  ************************
-
-LXArduinoDMXInput::LXArduinoDMXInput ( void )
-{
-	//zero buffer including _dmxData[0] which is start code
-    for (int n=0; n<DMX_MAX_SLOTS+1; n++) {
-    	_dmxData[n] = 0;
-    }
-    _interrupt_status = ISR_DISABLED;
-}
-
-LXArduinoDMXInput::LXArduinoDMXInput ( uint8_t pin  )
-{
-	pinMode(pin, OUTPUT);
-	digitalWrite(pin, LOW);
-	//zero buffer including _dmxData[0] which is start code
-    for (int n=0; n<DMX_MAX_SLOTS+1; n++) {
-    	_dmxData[n] = 0;
-    }
-    _interrupt_status = ISR_DISABLED;
-}
-
-LXArduinoDMXInput::~LXArduinoDMXInput ( void )
-{
-    stop();
-    _shared_receive_callback = NULL;
-    _shared_dmx_data = NULL;
-}
-
-void LXArduinoDMXInput::start ( void ) {
-	if ( _interrupt_status != ISR_ENABLED ) {	//prevent messing up sequence if already started...
-		LXUCSRRH = (unsigned char)(((F_CLK + DMX_DATA_BAUD * 8L) / (DMX_DATA_BAUD * 16L) - 1)>>8);
-		LXUCSRRL = (unsigned char) ((F_CLK + DMX_DATA_BAUD * 8L) / (DMX_DATA_BAUD * 16L) - 1);
-		LXUCSRA &= ~BIT_2X_SPEED;
-
-		_shared_dmx_data = dmxData();                 
-		_shared_dmx_state = DMX_STATE_IDLE;
-		_shared_dmx_slot = 0;
-	
-		LXUCSRC = FORMAT_8N2; 					//set length && stopbits (no parity)
-		LXUCSRB |= BIT_RX_ENABLE | BIT_RX_ISR_ENABLE;  //enable tx and tx interrupt
-		_interrupt_status = ISR_ENABLED;
-	}
-}
-
-void LXArduinoDMXInput::stop ( void ) { 
-	LXUCSRB &= ~BIT_RX_ISR_ENABLE;  //disable tx interrupt
-	LXUCSRB &= ~BIT_RX_ENABLE;     //disable tx enable
-	_interrupt_status = ISR_DISABLED;
-}
-
-uint8_t LXArduinoDMXInput::getSlot (int slot) {
-	return _dmxData[slot];
-}
-
-uint8_t* LXArduinoDMXInput::dmxData(void) {
-	return &_dmxData[0];
-}
-
-void LXArduinoDMXInput::setDataReceivedCallback(LXRecvCallback callback) {
-	_shared_receive_callback = callback;
-}
-
-/*!
- * @discussion RX ISR (receive interrupt service routine)
- *
- * this routine is called when USART receives data
- *
- * wait for break:  if have previously read data call callback function
- *
- * then on next receive:  check start code
- *
- * then on next receive:  read data until done (in which case idle)
- *
- *  NOTE: data is not double buffered
- *
- *  so a complete single frame is not guaranteed
- *
- *  the ISR will continue to read the next frame into the buffer
-*/
+//***********************************************************************************
+// ************************ RX ISR (receive interrupt service routine)  *************
+//
+// this routine is called when USART receives data
+// wait for break:  if have previously read data call callback function
+// then on next receive:  check start code
+// then on next receive:  read data until done (in which case idle)
+//
+//  NOTE: data is not double buffered
+//  so a complete single frame is not guaranteed
+//  the ISR will continue to read the next frame into the buffer
 
 ISR (LXUSART_RX_vect) {
 	uint8_t status_register = LXUCSRA;

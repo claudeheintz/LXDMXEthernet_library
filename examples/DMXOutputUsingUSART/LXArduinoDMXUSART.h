@@ -1,4 +1,4 @@
-/* LXArduinoDMX.h
+/* LXArduinoDMXUSART.h
    Copyright 2015 by Claude Heintz Design
    All rights reserved.
 
@@ -28,8 +28,8 @@ OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
 OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 */
 
-#ifndef LXArduinoDMX_H
-#define LXArduinoDMX_H
+#ifndef LXusartDMX_H
+#define LXusartDMX_H
 
 #include <Arduino.h>
 #include <inttypes.h>
@@ -37,83 +37,37 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #define DMX_MIN_SLOTS 24
 #define DMX_MAX_SLOTS 512
 
+#define DIRECTION_PIN_NOT_USED 255
+
 typedef void (*LXRecvCallback)(int);
 
-class LXArduinoDMXOutput {
+class LXUSARTDMX {
 
   public:
-	LXArduinoDMXOutput ( void );
-	/*!
-    * @param pin used to control driver chip's DE (data enable) line, HIGH for output
-    * @param slots number of slots aka channels or addresses (~24-512)
-   */
-	LXArduinoDMXOutput ( uint8_t pin, uint16_t slots  );
-    ~LXArduinoDMXOutput ( void );
-    
-   /*!
-    * @brief starts interrupt that continuously sends DMX output
-    * @discussion Sets up baud rate, bits and parity, 
-    *             sets globals accessed in ISR, 
-    *             enables transmission and tx interrupt.
-   */
-   void start( void );
-   /*!
-    * disables transmission and tx interrupt
-   */
-	void stop( void );
-	
-	/*!
-	 * @brief Sets the number of slots (aka addresses or channels) sent per DMX frame.
-	 * @discussion defaults to 512 or DMX_MAX_SLOTS and should be no less DMX_MIN_SLOTS slots.  
-	 *             The DMX standard specifies min break to break time no less than 1024 usecs.  
-	 *             At 44 usecs per slot ~= 24
-	 * @param slot the highest slot number (~24 to 512)
-	*/
-	void setMaxSlots (int slot);
-	/*!
-	 * @brief Sets the output value of a slot
-	 * @param slot number of the slot/address/channel (1-512)
-	 * @param value level (0-255)
-	*/
-   void setSlot (int slot, uint8_t value);
-   /*!
-    * @brief provides direct access to data array
-    * @return pointer to dmx array
-   */
-   uint8_t* dmxData(void);
-    
-  private:
-   /*!
-    * @brief true when ISR is enabled
-   */
-  	uint8_t  _interrupt_status;
-  	/*!
-    * @brief Array of dmx data including start code
-   */
-  	uint8_t  _dmxData[DMX_MAX_SLOTS+1];
-};
-
-class LXArduinoDMXInput {
-
-  public:
-	LXArduinoDMXInput ( void );
-	/*!
-	 * @param pin used to control driver chip's DE (data enable) line, LOW for input
-	*/
-	LXArduinoDMXInput ( uint8_t pin );
-   ~LXArduinoDMXInput ( void );
+	LXUSARTDMX ( void );
+   ~LXUSARTDMX ( void );
    
+   void startInput( void );
    /*!
     * @brief starts interrupt that continuously reads DMX data
     * @discussion sets up baud rate, bits and parity, 
     *             sets globals accessed in ISR, 
     *             enables transmission and tx interrupt
    */
-   void start( void );
+   void startOutput( void );
    /*!
     * @brief disables receive and rx interrupt
    */
 	void stop( void );
+	
+	/*!
+	 * @brief optional utility sets the pin used to control driver chip's
+	 *        DE (data enable) line, HIGH for output, LOW for input.     
+    * @param pin to be automatically set for input/output direction
+    */
+   void setDirectionPin( uint8_t pin );
+   
+   void setMaxSlots (int slot);
 
    /*!
     * @brief reads the value of a slot/address/channel
@@ -123,6 +77,9 @@ class LXArduinoDMXInput {
     * @return level (0-255)
    */
    uint8_t getSlot (int slot);
+   
+   void setSlot (int slot, uint8_t value);
+   
    /*!
     * @brief provides direct access to data array
     * @return pointer to dmx array
@@ -143,10 +100,15 @@ class LXArduinoDMXInput {
     * @brief True when ISR is enabled
    */
   	uint8_t  _interrupt_status;
+  	
+  	uint8_t  _direction_pin;
+  	
    /*!
     * @brief Array of dmx data including start code
    */
   	uint8_t  _dmxData[DMX_MAX_SLOTS+1];
 };
 
-#endif // ifndef LXArduinoDMX_H
+extern LXUSARTDMX LXSerialDMX;
+
+#endif // ifndef LXusartDMX_H

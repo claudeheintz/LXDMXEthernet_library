@@ -107,11 +107,6 @@ IPAddress broadcast_ip = INADDR_NONE;
 // buffer
 unsigned char packetBuffer[ARTNET_BUFFER_MAX];
 
-//LXArduinoDMX output instance
-#if defined(LXArduinoDMX_H)
-LXArduinoDMXOutput dmx_output(RXTX_PIN, DMX_MAX_SLOTS);
-#endif
-
 // An EthernetUDP instance to let us send and receive packets over UDP
 EthernetUDP eUDP;
 
@@ -176,7 +171,8 @@ void setup() {
     eUDP.begin(interface->dmxPort());
   }
 
-  dmx_output.start();
+  LXSerialDMX.setDirectionPin(RXTX_PIN);
+  LXSerialDMX.startOutput();
   
   if ( ! USE_SACN ) {
   	((LXArtNet*)interface)->send_art_poll_reply(eUDP);
@@ -199,7 +195,7 @@ void loop() {
 
   if ( good_dmx ) {
      for (int i = 1; i <= interface->numberOfSlots(); i++) {
-        dmx_output.setSlot(i , interface->getSlot(i));
+        LXSerialDMX.setSlot(i , interface->getSlot(i));
      }
      blinkLED();
   }

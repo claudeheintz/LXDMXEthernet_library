@@ -1,6 +1,6 @@
 /* LXSACN.cpp
-   Copyright 2015 by Claude Heintz Design
-   This code is in the public domain
+   Copyright 2015-2015 by Claude Heintz Design
+   see LXDMXEthernet.h for license
    
    LXSACN partially implements E1.31,
    Lightweight streaming protocol for transport of DMX512 using ACN

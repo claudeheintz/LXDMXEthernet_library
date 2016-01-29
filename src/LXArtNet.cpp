@@ -1,6 +1,6 @@
 /* LXArtNet.cpp
-   Copyright 2015 by Claude Heintz Design
-   This code is in the public domain
+   Copyright 2015-2015 by Claude Heintz Design
+   see LXDMXEthernet.h for license
    
    LXArtNet partially implements the Art-Net Ethernet Communication Standard.
    http://www.artisticlicence.com

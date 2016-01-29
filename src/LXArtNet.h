@@ -1,5 +1,4 @@
 /* LXArtNet.h
-   Copyright 2015 by Claude Heintz Design
    Copyright 2015-2015 by Claude Heintz Design
    see LXDMXEthernet.h for license
 

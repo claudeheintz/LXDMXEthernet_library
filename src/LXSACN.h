@@ -1,6 +1,6 @@
 /* LXSACN.h
    Copyright 2015 by Claude Heintz Design
-   See LXDMXEthernet.h for license
+   This code is in the public domain
    
    sACN E 1.31 is a public standard published by the PLASA technical standards program
    http://tsp.plasa.org/tsp/documents/published_docs.php
@@ -32,7 +32,18 @@
 class LXSACN : public LXDMXEthernet {
 
   public:
+/*!
+* @brief constructor for LXSACN
+*/  
 	LXSACN  ( void );
+/*!
+* @brief constructor for LXSACN with external buffer fro UDP packets
+* @param external packet buffer
+*/  
+	LXSACN ( uint8_t* buffer );
+/*!
+* @brief destructor for LXSACN  (frees packet buffer if allocated with constructor)
+*/  	
    ~LXSACN ( void );
 
 /*!
@@ -99,6 +110,16 @@ class LXSACN : public LXDMXEthernet {
  * @return 1 if packet contains dmx
  */    
    uint8_t  readDMXPacket  ( EthernetUDP eUDP );
+   
+ /*!
+ * @brief read contents of packet from _packet_buffer
+ * @discussion _packet_buffer should already contain packet payload when this is called
+ * @param eUDP EthernetUDP
+ * @param packetSize size of received packet
+ * @return 1 if packet contains dmx
+ */      
+   virtual uint8_t readDMXPacketContents (EthernetUDP eUDP, uint16_t packetSize );
+   
  /*!
  * @brief process packet, reading it into _packet_buffer
  * @param eUDP EthernetUDP
@@ -120,7 +141,11 @@ class LXSACN : public LXDMXEthernet {
 *             readSACNPacket fills the buffer with the payload of the incoming packet.
 *             Previous dmx data is invalidated.
 */
-  	uint8_t   _packet_buffer[SACN_BUFFER_MAX];
+  	uint8_t*   _packet_buffer;
+/*!
+* @brief indicates was created by constructor
+*/
+	uint8_t   _owns_buffer;
 /// number of slots/address/channels
   	int       _dmx_slots;
 /// universe 1-255 in this implementation
@@ -140,6 +165,11 @@ class LXSACN : public LXDMXEthernet {
   	uint16_t  parse_framing_layer ( uint16_t size );	
   	uint16_t  parse_dmp_layer     ( uint16_t size );
   	uint8_t   checkFlagsAndLength ( uint8_t* flb, uint16_t size );
+  	
+/*!
+* @brief initialize data structures
+*/
+   void  initialize  ( uint8_t* b );
 };
 
 #endif // ifndef LXSACNDMX_H

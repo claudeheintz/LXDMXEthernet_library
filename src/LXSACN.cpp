@@ -1,6 +1,6 @@
 /* LXSACN.cpp
    Copyright 2015 by Claude Heintz Design
-   See LXDMXEthernet.h for license
+   This code is in the public domain
    
    LXSACN partially implements E1.31,
    Lightweight streaming protocol for transport of DMX512 using ACN
@@ -13,6 +13,32 @@
 
 LXSACN::LXSACN ( void )
 {
+	initialize(0);
+}
+
+LXSACN::LXSACN ( uint8_t* buffer )
+{
+	initialize(buffer);
+}
+
+LXSACN::~LXSACN ( void )
+{
+	if ( _owns_buffer ) {		// if we created this buffer, then free the memory
+		free(_packet_buffer);
+	}
+}
+
+void  LXSACN::initialize  ( uint8_t* b ) {
+	if ( b == 0 ) {
+		// create buffer
+		_packet_buffer = (uint8_t*) malloc(SACN_BUFFER_MAX);
+		_owns_buffer = 1;
+	} else {
+		// external buffer
+		_packet_buffer = b;
+		_owns_buffer = 0;
+	}
+	
 	//zero buffer including _dmx_data[0] which is start code
     for (int n=0; n<SACN_BUFFER_MAX; n++) {
     	_packet_buffer[n] = 0;
@@ -24,11 +50,6 @@ LXSACN::LXSACN ( void )
     _dmx_slots = 0;
     _universe = 1;                    // NOTE: unlike Art-Net, sACN universes begin at 1
     _sequence = 1;
-}
-
-LXSACN::~LXSACN ( void )
-{
-    //no need for specific destructor
 }
 
 uint8_t  LXSACN::universe ( void ) {
@@ -72,6 +93,15 @@ uint8_t LXSACN::readDMXPacket ( EthernetUDP eUDP ) {
    	return ( startCode() == 0 );
    }	
    return 0;
+}
+
+uint8_t LXSACN::readDMXPacketContents ( EthernetUDP eUDP, uint16_t packetSize ) {
+	if ( parse_root_layer(packetSize) > 0 ) {
+   	if ( startCode() == 0 ) {
+   		return RESULT_DMX_RECEIVED;
+   	}
+   }	
+   return RESULT_NONE;
 }
 
 uint16_t LXSACN::readSACNPacket ( EthernetUDP eUDP ) {

@@ -1,6 +1,6 @@
 /* LXArtNet.cpp
    Copyright 2015 by Claude Heintz Design
-   See LXDMXEthernet.h for license
+   This code is in the public domain
    
    LXArtNet partially implements the Art-Net Ethernet Communication Standard.
    http://www.artisticlicence.com
@@ -21,42 +21,64 @@
 
 LXArtNet::LXArtNet ( IPAddress address )
 {
-	//zero buffer including _dmx_data[0] which is start code
-    for (int n=0; n<ARTNET_BUFFER_MAX; n++) {
-    	_packet_buffer[n] = 0;
-    }
-    
-    _dmx_slots = 0;
-    _universe = 0;
-    _net = 0;
+	initialize(0);
+	
     _my_address = address;
     _broadcast_address = INADDR_NONE;
     _dmx_sender = INADDR_NONE;
-    _sequence = 1;
 }
 
 LXArtNet::LXArtNet ( IPAddress address, IPAddress subnet_mask )
 {
-	//zero buffer including _dmx_data[0] which is start code
-    for (int n=0; n<ARTNET_BUFFER_MAX; n++) {
-    	_packet_buffer[n] = 0;
-    }
-    
-    _dmx_slots = 0;
-    _universe = 0;
-    _net = 0;
+	initialize(0);
+	
     _my_address = address;
     uint32_t a = (uint32_t) address;
     uint32_t s = (uint32_t) subnet_mask;
     _broadcast_address = IPAddress(a | ~s);
     _dmx_sender = INADDR_NONE;
-    _sequence = 1;
+}
+
+LXArtNet::LXArtNet ( IPAddress address, IPAddress subnet_mask, uint8_t* buffer )
+{
+	initialize(buffer);
+    _my_address = address;
+    uint32_t a = (uint32_t) address;
+    uint32_t s = (uint32_t) subnet_mask;
+    _broadcast_address = IPAddress(a | ~s);
+    _dmx_sender = INADDR_NONE;
 }
 
 LXArtNet::~LXArtNet ( void )
 {
-    //no need for specific destructor
+    if ( _owns_buffer ) {		// if we created this buffer, then free the memory
+		free(_packet_buffer);
+	}
 }
+
+void  LXArtNet::initialize  ( uint8_t* b ) {
+	if ( b == 0 ) {
+		// create buffer
+		_packet_buffer = (uint8_t*) malloc(ARTNET_BUFFER_MAX);
+		_owns_buffer = 1;
+	} else {
+		// external buffer
+		_packet_buffer = b;
+		_owns_buffer = 0;
+	}
+	
+	//zero buffer including _dmx_data[0] which is start code
+    for (int n=0; n<ARTNET_BUFFER_MAX; n++) {
+    	_packet_buffer[n] = 0;
+    }
+    
+    _dmx_slots = 0;
+    _universe = 0;
+    _net = 0;
+    _sequence = 1;
+    initializePollReply();
+}
+
 
 uint8_t  LXArtNet::universe ( void ) {
 	return _universe;
@@ -112,9 +134,27 @@ uint8_t* LXArtNet::dmxData( void ) {
 	return &_packet_buffer[ARTNET_ADDRESS_OFFSET+1];
 }
 
+uint8_t* LXArtNet::replyData( void ) {
+	return &_reply_buffer[0];
+}
+
 uint8_t LXArtNet::readDMXPacket ( EthernetUDP eUDP ) {
    uint16_t opcode = readArtNetPacket(eUDP);
-   return ( opcode == ARTNET_ART_DMX );
+   if ( opcode == ARTNET_ART_DMX ) {
+   	return RESULT_DMX_RECEIVED;
+   }
+   return RESULT_NONE;
+}
+
+uint8_t LXArtNet::readDMXPacketContents ( EthernetUDP eUDP, uint16_t packetSize ) {
+	uint16_t opcode = readArtNetPacketContents(eUDP, packetSize);
+   if ( opcode == ARTNET_ART_DMX ) {
+   	return RESULT_DMX_RECEIVED;
+   }
+   if ( opcode == ARTNET_ART_POLL ) {
+   	return RESULT_PACKET_COMPLETE;
+   }
+   return RESULT_NONE;
 }
 
 /*
@@ -126,49 +166,56 @@ uint8_t LXArtNet::readDMXPacket ( EthernetUDP eUDP ) {
   Packet size checks that packet is >= expected size to allow zero termination or padding
 */
 uint16_t LXArtNet::readArtNetPacket ( EthernetUDP eUDP ) {
-   uint16_t packetSize = eUDP.parsePacket();
+	uint16_t opcode = ARTNET_NOP;
+	uint16_t packetSize = eUDP.parsePacket();
+	if ( packetSize ) {
+		packetSize = eUDP.read(_packet_buffer, ARTNET_BUFFER_MAX);
+		opcode = readArtNetPacketContents(eUDP, packetSize);
+	}
+	return opcode;
+}
+
+uint16_t LXArtNet::readArtNetPacketContents ( EthernetUDP eUDP, uint16_t packetSize ) {
    uint16_t opcode = ARTNET_NOP;
-   if ( packetSize ) {
-      packetSize = eUDP.read(_packet_buffer, ARTNET_BUFFER_MAX);
-      _dmx_slots = 0;
-      /* Buffer now may not contain dmx data for desired universe.
-         After reading the packet into the buffer, check to make sure
-         that it is an Art-Net packet and retrieve the opcode that
-         tells what kind of message it is.                            */
-      opcode = parse_header();
-      switch ( opcode ) {
-		   case ARTNET_ART_DMX:
-		   	// ignore protocol version [10] hi byte [11] lo byte sequence[12], physical[13]
-				if (( _packet_buffer[14] == _universe ) && ( _packet_buffer[15] == _net )) {
-					packetSize -= 18;
-					uint16_t slots = _packet_buffer[17];
-					slots += _packet_buffer[16] << 8;
-				   if ( packetSize >= slots ) {
-						if ( (uint32_t)_dmx_sender == 0 ) {		//if first sender, remember address
-							_dmx_sender = eUDP.remoteIP();
-						}
-						if ( _dmx_sender == eUDP.remoteIP() ) {
-						   _dmx_slots = slots;
-						}	// matched sender
-					}		// matched size
-				}			// matched universe
-				if ( _dmx_slots == 0 ) {	//only set >0 if all of above matched
-					opcode = ARTNET_NOP;
-				}
-				break;
-			case ARTNET_ART_ADDRESS:
-				if (( packetSize >= 107 ) && ( _packet_buffer[11] >= 14 )) {  //protocol version [10] hi byte [11] lo byte
-		   	   opcode = parse_art_address();
-		   	   send_art_poll_reply( eUDP );
-		   	}
-		   	break;
-			case ARTNET_ART_POLL:
-				if (( packetSize >= 14 ) && ( _packet_buffer[11] >= 14 )) {
-				   send_art_poll_reply( eUDP );
-				}
-				break;
-		}
-   }
+	
+	_dmx_slots = 0;
+	/* Buffer now may not contain dmx data for desired universe.
+		After reading the packet into the buffer, check to make sure
+		that it is an Art-Net packet and retrieve the opcode that
+		tells what kind of message it is.                            */
+	opcode = parse_header();
+	switch ( opcode ) {
+		case ARTNET_ART_DMX:
+			// ignore protocol version [10] hi byte [11] lo byte sequence[12], physical[13]
+			if (( _packet_buffer[14] == _universe ) && ( _packet_buffer[15] == _net )) {
+				packetSize -= 18;
+				uint16_t slots = _packet_buffer[17];
+				slots += _packet_buffer[16] << 8;
+				if ( packetSize >= slots ) {
+					if ( (uint32_t)_dmx_sender == 0 ) {		//if first sender, remember address
+						_dmx_sender = eUDP.remoteIP();
+					}
+					if ( _dmx_sender == eUDP.remoteIP() ) {
+						_dmx_slots = slots;
+					}	// matched sender
+				}		// matched size
+			}			// matched universe
+			if ( _dmx_slots == 0 ) {	//only set >0 if all of above matched
+				opcode = ARTNET_NOP;
+			}
+			break;
+		case ARTNET_ART_ADDRESS:
+			if (( packetSize >= 107 ) && ( _packet_buffer[11] >= 14 )) {  //protocol version [10] hi byte [11] lo byte
+				opcode = parse_art_address();
+				send_art_poll_reply( eUDP );
+			}
+			break;
+		case ARTNET_ART_POLL:
+			if (( packetSize >= 14 ) && ( _packet_buffer[11] >= 14 )) {
+				send_art_poll_reply( eUDP );
+			}
+			break;
+	}
    return opcode;
 }
 
@@ -209,64 +256,14 @@ void LXArtNet::sendDMX ( EthernetUDP eUDP, IPAddress to_ip ) {
   includes my_ip as address of this node
 */
 void LXArtNet::send_art_poll_reply( EthernetUDP eUDP ) {
-  unsigned char  replyBuffer[ARTNET_REPLY_SIZE];
-  int i;
-  for ( i = 0; i < ARTNET_REPLY_SIZE; i++ ) {
-    replyBuffer[i] = 0;
-  }
-  replyBuffer[0] = 'A';
-  replyBuffer[1] = 'r';
-  replyBuffer[2] = 't';
-  replyBuffer[3] = '-';
-  replyBuffer[4] = 'N';
-  replyBuffer[5] = 'e';
-  replyBuffer[6] = 't';
-  replyBuffer[7] = 0;
-  replyBuffer[8] = 0;        // op code lo-hi
-  replyBuffer[9] = 0x21;
-  replyBuffer[10] = ((uint32_t)_my_address) & 0xff;      //ip address
-  replyBuffer[11] = ((uint32_t)_my_address) >> 8;
-  replyBuffer[12] = ((uint32_t)_my_address) >> 16;
-  replyBuffer[13] = ((uint32_t)_my_address) >>24;
-  replyBuffer[14] = 0x36;    // port lo first always 0x1936
-  replyBuffer[15] = 0x19;
-  replyBuffer[16] = 0;       // firmware hi-lo
-  replyBuffer[17] = 0;
-  replyBuffer[18] = 0;       // subnet hi-lo
-  replyBuffer[19] = 0;
-  replyBuffer[20] = 0;       // oem hi-lo
-  replyBuffer[21] = 0;
-  replyBuffer[22] = 0;       // ubea
-  replyBuffer[23] = 0;       // status
-  replyBuffer[24] = 0x50;    //     Mfg Code
-  replyBuffer[25] = 0x12;    //     seems DMX workshop reads these bytes backwards
-  replyBuffer[26] = 'A';     // short name
-  replyBuffer[27] = 'r';
-  replyBuffer[28] = 'd';
-  replyBuffer[29] = 'u';
-  replyBuffer[30] = 'i';
-  replyBuffer[31] = 'n';
-  replyBuffer[32] = 'o';
-  replyBuffer[33] =  0;
-  replyBuffer[44] = 'A';     // long name
-  replyBuffer[45] = 'r';
-  replyBuffer[46] = 'd';
-  replyBuffer[47] = 'u';
-  replyBuffer[48] = 'i';
-  replyBuffer[49] = 'n';
-  replyBuffer[50] = 'o';
-  replyBuffer[51] =  0;
-  replyBuffer[173] = 1;    // number of ports
-  replyBuffer[174] = 128;  // can output from network
-  replyBuffer[182] = 128;  //  good output... change if error
-  replyBuffer[190] = _universe;
+	_reply_buffer[190] = _universe;
   
   IPAddress a = _broadcast_address;
   if ( a == INADDR_NONE ) {
     a = eUDP.remoteIP();   // reply directly if no broadcast address is supplied
   }
   eUDP.beginPacket(a, ARTNET_PORT);
-  eUDP.write(replyBuffer, ARTNET_REPLY_SIZE);
+  eUDP.write(_reply_buffer, ARTNET_REPLY_SIZE);
   eUDP.endPacket();
 }
 
@@ -291,7 +288,7 @@ uint16_t LXArtNet::parse_art_address( void ) {
 	//[96][97][98][99]                  input universe   ch 1 to 4
 	//[100][101][102][103]               output universe   ch 1 to 4
 	setUniverseAddress(_packet_buffer[100]);
-	//[104]                             subnet
+	//[102][103][104][105]                      subnet   ch 1 to 4
 	setSubnetAddress(_packet_buffer[104]);
 	//[105]                                   reserved
 	uint8_t command = _packet_buffer[106]; // command
@@ -310,4 +307,63 @@ uint16_t LXArtNet::parse_art_address( void ) {
 	   	break;
 	}
 	return ARTNET_ART_ADDRESS;
+}
+
+void  LXArtNet::initializePollReply  ( void ) {
+	int i;
+  for ( i = 0; i < ARTNET_REPLY_SIZE; i++ ) {
+    _reply_buffer[i] = 0;
+  }
+  _reply_buffer[0] = 'A';
+  _reply_buffer[1] = 'r';
+  _reply_buffer[2] = 't';
+  _reply_buffer[3] = '-';
+  _reply_buffer[4] = 'N';
+  _reply_buffer[5] = 'e';
+  _reply_buffer[6] = 't';
+  _reply_buffer[7] = 0;
+  _reply_buffer[8] = 0;        // op code lo-hi
+  _reply_buffer[9] = 0x21;
+  _reply_buffer[10] = ((uint32_t)_my_address) & 0xff;      //ip address
+  _reply_buffer[11] = ((uint32_t)_my_address) >> 8;
+  _reply_buffer[12] = ((uint32_t)_my_address) >> 16;
+  _reply_buffer[13] = ((uint32_t)_my_address) >>24;
+  _reply_buffer[14] = 0x36;    // port lo first always 0x1936
+  _reply_buffer[15] = 0x19;
+  _reply_buffer[16] = 0;       // firmware hi-lo
+  _reply_buffer[17] = 0;
+  _reply_buffer[18] = 0;       // subnet hi-lo
+  _reply_buffer[19] = 0;
+  _reply_buffer[20] = 0;       // oem hi-lo
+  _reply_buffer[21] = 0;
+  _reply_buffer[22] = 0;       // ubea
+  _reply_buffer[23] = 0;       // status
+  _reply_buffer[24] = 0x50;    //     Mfg Code
+  _reply_buffer[25] = 0x12;    //     seems DMX workshop reads these bytes backwards
+  _reply_buffer[26] = 'A';     // short name
+  _reply_buffer[27] = 'r';
+  _reply_buffer[28] = 'd';
+  _reply_buffer[29] = 'u';
+  _reply_buffer[30] = 'i';
+  _reply_buffer[31] = 'n';
+  _reply_buffer[32] = 'o';
+  _reply_buffer[33] = 'D';
+  _reply_buffer[34] = 'M';
+  _reply_buffer[35] = 'X';
+  _reply_buffer[36] =  0;
+  _reply_buffer[44] = 'A';     // long name
+  _reply_buffer[45] = 'r';
+  _reply_buffer[46] = 'd';
+  _reply_buffer[47] = 'u';
+  _reply_buffer[48] = 'i';
+  _reply_buffer[49] = 'n';
+  _reply_buffer[50] = 'o';
+  _reply_buffer[51] = 'D';
+  _reply_buffer[52] = 'M';
+  _reply_buffer[53] = 'X';
+  _reply_buffer[54] =  0;
+  _reply_buffer[173] = 1;    // number of ports
+  _reply_buffer[174] = 128;  // can output from network
+  _reply_buffer[182] = 128;  //  good output... change if error
+  _reply_buffer[190] = _universe;
 }

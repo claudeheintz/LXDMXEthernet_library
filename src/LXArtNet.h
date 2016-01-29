@@ -1,6 +1,6 @@
 /* LXArtNet.h
    Copyright 2015 by Claude Heintz Design
-   See LXDMXEthernet.h for license
+   This code is in the public domain
 
 	Art-Net(TM) Designed by and Copyright Artistic Licence (UK) Ltd
 */
@@ -54,6 +54,18 @@ class LXArtNet : public LXDMXEthernet {
 * @param subnet_mask used to set broadcast address
 */  
 	LXArtNet  ( IPAddress address, IPAddress subnet_mask );
+/*!
+* @brief constructor creates instance with external buffer for UDP packet
+* @param address sent in ArtPollReply
+* @param subnet_mask used to set broadcast address
+* @param buffer external buffer for UDP packets
+*/ 
+	LXArtNet ( IPAddress address, IPAddress subnet_mask, uint8_t* buffer );
+	
+	
+/*!
+* @brief destructor for LXArtNet (frees packet buffer if allocated with constructor)
+*/ 
    ~LXArtNet ( void );
 
 /*!
@@ -131,6 +143,11 @@ class LXArtNet : public LXDMXEthernet {
  * @return uint8_t* to dmx data buffer
  */ 
    uint8_t* dmxData      ( void );
+/*!
+ * @brief direct pointer to poll reply packet contents
+ * @return uint8_t* to poll reply packet contents
+ */ 
+   uint8_t* replyData      ( void );
 
  /*!
  * @brief read UDP packet
@@ -139,11 +156,26 @@ class LXArtNet : public LXDMXEthernet {
  */    
    uint8_t  readDMXPacket       ( EthernetUDP eUDP );
  /*!
+ * @brief read contents of packet from _packet_buffer
+ * @discussion _packet_buffer should already contain packet payload when this is called
+ * @param wUDP WiFiUDP
+ * @param packetSize size of received packet
+ * @return 1 if packet contains dmx
+ */      
+   uint8_t readDMXPacketContents ( EthernetUDP eUDP, uint16_t packetSize );
+ /*!
  * @brief process packet, reading it into _packet_buffer
  * @param eUDP EthernetUDP (used for Poll Reply if applicable)
  * @return Art-Net opcode of packet
  */
    uint16_t readArtNetPacket    ( EthernetUDP eUDP );
+ /*!
+ * @brief read contents of packet from _packet_buffer
+ * @param wUDP WiFiUDP (used for Poll Reply if applicable)
+ * @param packetSize size of received packet
+ * @return Art-Net opcode of packet
+ */   
+   uint16_t readArtNetPacketContents ( EthernetUDP eUDP, uint16_t packetSize );
  /*!
  * @brief send Art-Net ArtDMX packet for dmx output from network
  * @param eUDP EthernetUDP object to be used for sending UDP packet
@@ -165,7 +197,18 @@ class LXArtNet : public LXDMXEthernet {
 *             readArtNetPacket fills the buffer with the payload of the incoming packet.
 *             Previous dmx data is invalidated.
 */
-  	uint8_t   _packet_buffer[ARTNET_BUFFER_MAX];
+  	uint8_t*   _packet_buffer;
+  	
+/*!
+* @brief indicates the _packet_buffer was allocated by the constructor and is private.
+*/
+	uint8_t   _owns_buffer;
+
+/*!
+* @brief array that holds contents of outgoing ArtPollReply packet
+*/	
+	uint8_t _reply_buffer[ARTNET_REPLY_SIZE];
+	
 /// number of slots/address/channels
   	int       _dmx_slots;
 /// high nibble subnet, low nibble universe
@@ -192,6 +235,16 @@ class LXArtNet : public LXDMXEthernet {
 * @return opcode in case command changes dmx data
 */
    uint16_t  parse_art_address   ( void );
+   
+/*!
+* @brief initialize data structures
+*/
+   void  initialize  ( uint8_t* b );
+   
+/*!
+* @brief initialize poll reply buffer
+*/
+   void  initializePollReply  ( void );
    
 };
 

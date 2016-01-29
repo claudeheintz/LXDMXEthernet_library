@@ -1,5 +1,5 @@
 /* LXArduinoDMXUSART.h
-   Copyright 2015 by Claude Heintz Design
+   Copyright 2015-2016 by Claude Heintz Design
    All rights reserved.
 
 Redistribution and use in source and binary forms, with or without
@@ -41,22 +41,45 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 typedef void (*LXRecvCallback)(int);
 
+/*!   
+@class LXUSARTDMX
+@abstract
+   LXUSARTDMX is a driver for sending or receiving DMX using an AVR family microcontroller
+   UART0 RX pin 0, TX pin 1
+   
+   LXUSARTDMX output mode continuously sends DMX once its interrupts have been enabled using startOutput().
+   Use setSlot() to set the level value for a particular DMX dimmer/address/channel.
+   
+   LXUSARTDMX input mode continuously receives DMX once its interrupts have been enabled using startInput()
+   Use getSlot() to read the level value for a particular DMX dimmer/address/channel.
+   
+   LXUSARTDMX is used with a single instance called LXSerialDMX	.
+*/
+
 class LXUSARTDMX {
 
   public:
 	LXUSARTDMX ( void );
    ~LXUSARTDMX ( void );
    
-   void startInput( void );
    /*!
     * @brief starts interrupt that continuously reads DMX data
+    * @discussion sets up baud rate, bits and parity, 
+    *             sets globals accessed in ISR, 
+    *             enables receive and rx interrupt
+   */
+   void startInput( void );
+   
+   /*!
+    * @brief starts interrupt that continuously sends DMX data
     * @discussion sets up baud rate, bits and parity, 
     *             sets globals accessed in ISR, 
     *             enables transmission and tx interrupt
    */
    void startOutput( void );
+   
    /*!
-    * @brief disables receive and rx interrupt
+    * @brief disables USART
    */
 	void stop( void );
 	
@@ -67,6 +90,13 @@ class LXUSARTDMX {
     */
    void setDirectionPin( uint8_t pin );
    
+   /*!
+	 * @brief Sets the number of slots (aka addresses or channels) sent per DMX frame.
+	 * @discussion defaults to 512 or DMX_MAX_SLOTS and should be no less DMX_MIN_SLOTS slots.  
+	 *             The DMX standard specifies min break to break time no less than 1024 usecs.  
+	 *             At 44 usecs per slot ~= 24
+	 * @param slot the highest slot number (~24 to 512)
+	*/
    void setMaxSlots (int slot);
 
    /*!
@@ -78,6 +108,11 @@ class LXUSARTDMX {
    */
    uint8_t getSlot (int slot);
    
+   /*!
+	 * @brief Sets the output value of a slot
+	 * @param slot number of the slot/address/channel (1-512)
+	 * @param value level (0-255)
+	*/
    void setSlot (int slot, uint8_t value);
    
    /*!
@@ -101,6 +136,9 @@ class LXUSARTDMX {
    */
   	uint8_t  _interrupt_status;
   	
+  	/*!
+   * @brief pin used to control direction of output driver chip
+   */
   	uint8_t  _direction_pin;
   	
    /*!

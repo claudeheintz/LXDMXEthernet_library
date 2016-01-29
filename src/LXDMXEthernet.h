@@ -1,31 +1,6 @@
 /* LXDMXEthernet.h
    Copyright 2015 by Claude Heintz Design
-   All rights reserved.
-
-Redistribution and use in source and binary forms, with or without
-modification, are permitted provided that the following conditions are met:
-
-* Redistributions of source code must retain the above copyright notice, this
-  list of conditions and the following disclaimer.
-
-* Redistributions in binary form must reproduce the above copyright notice,
-  this list of conditions and the following disclaimer in the documentation
-  and/or other materials provided with the distribution.
-
-* Neither the name of LXDMXEthernet nor the names of its
-  contributors may be used to endorse or promote products derived from
-  this software without specific prior written permission.
-
-THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS"
-AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE
-IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE
-DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT HOLDER OR CONTRIBUTORS BE LIABLE
-FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL
-DAMAGES (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR
-SERVICES; LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER
-CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY,
-OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
-OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
+   
 */
 
 #ifndef LXDMXETHERNET_H
@@ -34,6 +9,10 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include <Arduino.h>
 #include <EthernetUdp.h>
 #include <inttypes.h>
+
+#define RESULT_NONE 0
+#define RESULT_DMX_RECEIVED 1
+#define RESULT_PACKET_COMPLETE 2
 
 /*!   
 @class LXDMXEthernet
@@ -46,7 +25,7 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
           Ethernet library used with the original Arduino Ethernet Shield
           For the Ethernet v2 shield, use LXDMXEthernet2_library along with Ethernet2 Library
           
-          For multicast, EthernetUDP.h and EthernetUD.cpp in the Ethernet library
+          For multicast, EthernetUDP.h and EthernetUD2.cpp in the Ethernet library
           must be modified to add the beginMulticast method.
           See the code at the bottom of LXDMXEthernet.h
 */
@@ -107,6 +86,19 @@ class LXDMXEthernet {
  * @return 1 if packet contains dmx
  */   
    virtual uint8_t readDMXPacket ( EthernetUDP eUDP );
+   
+ /*!
+ * @brief read contents of packet from _packet_buffer
+ * @discussion _packet_buffer should already contain packet payload when this is called
+ * @param eUDP EthernetUDP
+ * @param packetSize size of received packet
+ * @return 1 if packet contains dmx
+ */      
+   virtual uint8_t readDMXPacketContents (EthernetUDP eUDP, uint16_t packetSize );
+   
+/*!
+ * @brief send the contents of the _packet_buffer to the address to_ip
+ */
    virtual void    sendDMX       ( EthernetUDP eUDP, IPAddress to_ip );
 };
 

@@ -1,6 +1,7 @@
 /* LXArtNet.h
    Copyright 2015 by Claude Heintz Design
-   This code is in the public domain
+   Copyright 2015-2015 by Claude Heintz Design
+   see LXDMXEthernet.h for license
 
 	Art-Net(TM) Designed by and Copyright Artistic Licence (UK) Ltd
 */

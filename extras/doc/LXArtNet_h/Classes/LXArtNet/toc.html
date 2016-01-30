@@ -27,17 +27,23 @@ marginheight="0">
 </table>
 <div toc="collapsible" class="collapsible" >
 
-<ul class="tocSubEntryList"><!-- cdobj --><li class="tocSubEntry"><a href="index.html#//apple_ref/cpp/instm/LXArtNet/LXArtNet//(IPAddress)" target="_top">LXArtNet(IPAddress)</a></li>
+<ul class="tocSubEntryList"><!-- cdobj --><li class="tocSubEntry"><a href="index.html#//apple_ref/cpp/instm/LXArtNet/LXArtNet//(IPAddress,IPAddress,uint8_t*)" target="_top">LXArtNet</a></li>
+<li class="tocSubEntry"><a href="index.html#//apple_ref/cpp/instm/LXArtNet/LXArtNet//(IPAddress)" target="_top">LXArtNet(IPAddress)</a></li>
 <li class="tocSubEntry"><a href="index.html#//apple_ref/cpp/instm/LXArtNet/LXArtNet//(IPAddress,IPAddress)" target="_top">LXArtNet(IPAddress, IPAddress)</a></li>
+<li class="tocSubEntry"><a href="index.html#//apple_ref/cpp/instm/LXArtNet/~LXArtNet//()" target="_top">~LXArtNet</a></li>
 </ul><span class="hd_tocAccess">Public</span>
 <ul class="tocSubEntryList"><!-- public --><li class="tocSubEntry"><a href="index.html#//apple_ref/cpp/instm/LXArtNet/dmxData/uint8_t*/()" target="_top">dmxData</a></li>
 <li class="tocSubEntry"><a href="index.html#//apple_ref/cpp/instm/LXArtNet/dmxPort/uint16_t/()" target="_top">dmxPort</a></li>
 <li class="tocSubEntry"><a href="index.html#//apple_ref/cpp/instm/LXArtNet/getSlot/uint8_t/(int)" target="_top">getSlot</a></li>
 <li class="tocSubEntry"><a href="index.html#//apple_ref/cpp/instm/LXArtNet/numberOfSlots/int/()" target="_top">numberOfSlots</a></li>
 <li class="tocSubEntry"><a href="index.html#//apple_ref/cpp/instm/LXArtNet/readArtNetPacket/uint16_t/(EthernetUDP)" target="_top">readArtNetPacket</a></li>
+<li class="tocSubEntry"><a href="index.html#//apple_ref/cpp/instm/LXArtNet/readArtNetPacketContents/uint16_t/(EthernetUDP,uint16_t)" target="_top">readArtNetPacketContents</a></li>
 <li class="tocSubEntry"><a href="index.html#//apple_ref/cpp/instm/LXArtNet/readDMXPacket/uint8_t/(EthernetUDP)" target="_top">readDMXPacket</a></li>
+<li class="tocSubEntry"><a href="index.html#//apple_ref/cpp/instm/LXArtNet/readDMXPacketContents/uint8_t/(EthernetUDP,uint16_t)" target="_top">readDMXPacketContents</a></li>
+<li class="tocSubEntry"><a href="index.html#//apple_ref/cpp/instm/LXArtNet/replyData/uint8_t*/()" target="_top">replyData</a></li>
 <li class="tocSubEntry"><a href="index.html#//apple_ref/cpp/instm/LXArtNet/send_art_poll_reply/void/(EthernetUDP)" target="_top">send_art_poll_reply</a></li>
 <li class="tocSubEntry"><a href="index.html#//apple_ref/cpp/instm/LXArtNet/sendDMX/void/(EthernetUDP,IPAddress)" target="_top">sendDMX</a></li>
+<li class="tocSubEntry"><a href="index.html#//apple_ref/cpp/instm/LXArtNet/setNetAddress/void/(uint8_t)" target="_top">setNetAddress</a></li>
 <li class="tocSubEntry"><a href="index.html#//apple_ref/cpp/instm/LXArtNet/setNumberOfSlots/void/(int)" target="_top">setNumberOfSlots</a></li>
 <li class="tocSubEntry"><a href="index.html#//apple_ref/cpp/instm/LXArtNet/setSlot/void/(int,uint8_t)" target="_top">setSlot</a></li>
 <li class="tocSubEntry"><a href="index.html#//apple_ref/cpp/instm/LXArtNet/setSubnetAddress/void/(uint8_t)" target="_top">setSubnetAddress</a></li>
@@ -47,7 +53,9 @@ marginheight="0">
 <li class="tocSubEntry"><a href="index.html#//apple_ref/cpp/instm/LXArtNet/universe/uint8_t/()" target="_top">universe</a></li>
 </ul><span class='hd_tocAccessSpace'>&nbsp;<br></span>
 <span class="hd_tocAccess">Protected</span>
-<ul class="tocSubEntryList"><!-- private --><li class="tocSubEntry"><a href="index.html#//apple_ref/cpp/instm/LXArtNet/parse_art_address/uint16_t/()" target="_top">parse_art_address</a></li>
+<ul class="tocSubEntryList"><!-- private --><li class="tocSubEntry"><a href="index.html#//apple_ref/cpp/instm/LXArtNet/initialize/void/(uint8_t*)" target="_top">initialize</a></li>
+<li class="tocSubEntry"><a href="index.html#//apple_ref/cpp/instm/LXArtNet/initializePollReply/void/()" target="_top">initializePollReply</a></li>
+<li class="tocSubEntry"><a href="index.html#//apple_ref/cpp/instm/LXArtNet/parse_art_address/uint16_t/()" target="_top">parse_art_address</a></li>
 <li class="tocSubEntry"><a href="index.html#//apple_ref/cpp/instm/LXArtNet/parse_header/uint16_t/()" target="_top">parse_header</a></li>
 </ul></div></div>
 <div toc="section">
@@ -56,7 +64,9 @@ marginheight="0">
 </table>
 <div toc="collapsible" class="collapsible" >
 <span class="hd_tocAccess">Protected</span>
-<ul class="tocSubEntryList"><!-- private --><li class="tocSubEntry"><a href="index.html#//apple_ref/cpp/data/LXArtNet/_packet_buffer" target="_top">_packet_buffer</a></li>
+<ul class="tocSubEntryList"><!-- private --><li class="tocSubEntry"><a href="index.html#//apple_ref/cpp/data/LXArtNet/_owns_buffer" target="_top">_owns_buffer</a></li>
+<li class="tocSubEntry"><a href="index.html#//apple_ref/cpp/data/LXArtNet/_packet_buffer" target="_top">_packet_buffer</a></li>
+<li class="tocSubEntry"><a href="index.html#//apple_ref/cpp/data/LXArtNet/_reply_buffer" target="_top">_reply_buffer</a></li>
 </ul></div></div>
 <hr class="tocSeparator">
 <h4 class="tocSubheading">Other Reference</h4>

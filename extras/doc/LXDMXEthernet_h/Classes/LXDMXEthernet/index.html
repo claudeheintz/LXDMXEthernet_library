@@ -289,6 +289,12 @@ See the code at the bottom of LXDMXEthernet.h
 <dt><tt><a href="index.html#//apple_ref/cpp/instm/LXDMXEthernet/readDMXPacket/uint8_t/(EthernetUDP)" target="_top">readDMXPacket</a></tt></dt>
 <dd><p>read UDP packet
 </dd>
+<dt><tt><a href="index.html#//apple_ref/cpp/instm/LXDMXEthernet/readDMXPacketContents/uint8_t/(EthernetUDP,uint16_t)" target="_top">readDMXPacketContents</a></tt></dt>
+<dd><p>read contents of packet from _packet_buffer
+</dd>
+<dt><tt><a href="index.html#//apple_ref/cpp/instm/LXDMXEthernet/sendDMX/void/(EthernetUDP,IPAddress)" target="_top">sendDMX</a></tt></dt>
+<dd><p>send the contents of the _packet_buffer to the address to_ip
+</dd>
 <dt><tt><a href="index.html#//apple_ref/cpp/instm/LXDMXEthernet/setNumberOfSlots/void/(int)" target="_top">setNumberOfSlots</a></tt></dt>
 <dd><p>set number of slots (aka addresses or channels)
 </dd>
@@ -369,9 +375,47 @@ See the code at the bottom of LXDMXEthernet.h
 <br><span class="keyword">virtual</span> <!-- a logicalPath="//apple_ref/cpp/cl/uint8_t //apple_ref/cpp/tdef/uint8_t //apple_ref/cpp/tag/uint8_t //apple_ref/cpp/struct/uint8_t //apple_ref/cpp/intf/uint8_t //apple_ref/doc/anysymbol/uint8_t" machineGenerated="true" --><span class="type">uint8_t</span><!-- /a --> <!-- a logicalPath="//apple_ref/cpp/instm/LXDMXEthernet/readDMXPacket //apple_ref/cpp/clm/LXDMXEthernet/readDMXPacket //apple_ref/cpp/intfcm/LXDMXEthernet/readDMXPacket //apple_ref/cpp/intfm/LXDMXEthernet/readDMXPacket //apple_ref/cpp/func/readDMXPacket //apple_ref/cpp/ftmplt/LXDMXEthernet/readDMXPacket //apple_ref/cpp/defn/readDMXPacket //apple_ref/cpp/macro/readDMXPacket //apple_ref/doc/anysymbol/readDMXPacket" machineGenerated="true" --><span class="function">readDMXPacket</span><!-- /a --> (
     <!-- a logicalPath="//apple_ref/cpp/cl/EthernetUDP //apple_ref/cpp/tdef/EthernetUDP //apple_ref/cpp/tag/EthernetUDP //apple_ref/cpp/struct/EthernetUDP //apple_ref/cpp/intf/EthernetUDP //apple_ref/doc/anysymbol/EthernetUDP" machineGenerated="true" --><span class="type">EthernetUDP</span><!-- /a --> <span class="param">eUDP</span> ); </pre>
 </div>
-<h5 class="tight"><font face="Lucida Grande,Helvetica,Arial">Return Value</font></h5><p><!-- begin return value --><p>1 if packet contains dmx
+<h5 class="tight"><font face="Lucida Grande,Helvetica,Arial">Return Value</font></h5><p><!-- begin return value --><p>RESULT_NONE || RESULT_DMX_RECEIVED ( || RESULT_PACKET_COMPLETE )
 
-<!-- end return value --></p><hr class="betweenAPIEntries"><!-- headerDoc=instm;  uid=//apple_ref/cpp/instm/LXDMXEthernet/setNumberOfSlots/void/(int);   name=LXDMXEthernet::setNumberOfSlots -->
+<!-- end return value --></p><hr class="betweenAPIEntries"><!-- headerDoc=instm;  uid=//apple_ref/cpp/instm/LXDMXEthernet/readDMXPacketContents/uint8_t/(EthernetUDP,uint16_t);   name=LXDMXEthernet::readDMXPacketContents -->
+<a name="//apple_ref/cpp/instm/LXDMXEthernet/readDMXPacketContents/uint8_t/(EthernetUDP,uint16_t)"></a>
+<h3><a name="readDMXPacketContents">readDMXPacketContents</a></h3>
+<hr class="afterName"><p><!-- headerDoc=abstract;uid=//apple_ref/cpp/instm/LXDMXEthernet/readDMXPacketContents/uint8_t/(EthernetUDP,uint16_t);name=start --><!-- begin abstract --><p>read contents of packet from _packet_buffer
+<!-- end abstract --><!-- headerDoc=abstract;uid=//apple_ref/cpp/instm/LXDMXEthernet/readDMXPacketContents/uint8_t/(EthernetUDP,uint16_t);name=end --></p>
+<div class='declaration_indent'>
+<pre><tt>public</tt>
+<br><span class="keyword">virtual</span> <!-- a logicalPath="//apple_ref/cpp/cl/uint8_t //apple_ref/cpp/tdef/uint8_t //apple_ref/cpp/tag/uint8_t //apple_ref/cpp/struct/uint8_t //apple_ref/cpp/intf/uint8_t //apple_ref/doc/anysymbol/uint8_t" machineGenerated="true" --><span class="type">uint8_t</span><!-- /a --> <!-- a logicalPath="//apple_ref/cpp/instm/LXDMXEthernet/readDMXPacketContents //apple_ref/cpp/clm/LXDMXEthernet/readDMXPacketContents //apple_ref/cpp/intfcm/LXDMXEthernet/readDMXPacketContents //apple_ref/cpp/intfm/LXDMXEthernet/readDMXPacketContents //apple_ref/cpp/func/readDMXPacketContents //apple_ref/cpp/ftmplt/LXDMXEthernet/readDMXPacketContents //apple_ref/cpp/defn/readDMXPacketContents //apple_ref/cpp/macro/readDMXPacketContents //apple_ref/doc/anysymbol/readDMXPacketContents" machineGenerated="true" --><span class="function">readDMXPacketContents</span><!-- /a --> (
+    <!-- a logicalPath="//apple_ref/cpp/cl/EthernetUDP //apple_ref/cpp/tdef/EthernetUDP //apple_ref/cpp/tag/EthernetUDP //apple_ref/cpp/struct/EthernetUDP //apple_ref/cpp/intf/EthernetUDP //apple_ref/doc/anysymbol/EthernetUDP" machineGenerated="true" --><span class="type">EthernetUDP</span><!-- /a --> <span class="param">eUDP</span>,
+    <!-- a logicalPath="//apple_ref/cpp/cl/uint16_t //apple_ref/cpp/tdef/uint16_t //apple_ref/cpp/tag/uint16_t //apple_ref/cpp/struct/uint16_t //apple_ref/cpp/intf/uint16_t //apple_ref/doc/anysymbol/uint16_t" machineGenerated="true" --><span class="type">uint16_t</span><!-- /a --> <span class="param">packetSize</span> ); </pre>
+</div>
+<h5 class="tight"><font face="Lucida Grande,Helvetica,Arial">Parameters</font></h5>
+<div class='param_indent'>
+<dl>
+<dt><!-- headerDoc=functionparam;  uid=//apple_ref/doc/functionparam/LXDMXEthernet/readDMXPacketContents/eUDP;   name=readDMXPacketContents::eUDP -->
+<a name="//apple_ref/doc/functionparam/LXDMXEthernet/readDMXPacketContents/eUDP"></a>
+<code>eUDP</code></dt><dd><p>EthernetUDP</dd>
+<dt><!-- headerDoc=functionparam;  uid=//apple_ref/doc/functionparam/LXDMXEthernet/readDMXPacketContents/packetSize;   name=readDMXPacketContents::packetSize -->
+<a name="//apple_ref/doc/functionparam/LXDMXEthernet/readDMXPacketContents/packetSize"></a>
+<code>packetSize</code></dt><dd><p>size of received packet</dd>
+</dl>
+</div>
+<h5 class="tight"><font face="Lucida Grande,Helvetica,Arial">Return Value</font></h5><p><!-- begin return value --><p>RESULT_NONE || RESULT_DMX_RECEIVED ( || RESULT_PACKET_COMPLETE )
+
+<!-- end return value --></p><h5 class="tight"><font face="Lucida Grande,Helvetica,Arial">Discussion</font></h5>
+<!-- begin discussion --><!-- headerDoc=discussion;uid=//apple_ref/cpp/instm/LXDMXEthernet/readDMXPacketContents/uint8_t/(EthernetUDP,uint16_t);name=start --><p>_packet_buffer should already contain packet payload when this is called
+<!-- headerDoc=discussion;uid=//apple_ref/cpp/instm/LXDMXEthernet/readDMXPacketContents/uint8_t/(EthernetUDP,uint16_t);name=end --><!-- end discussion -->
+<hr class="betweenAPIEntries"><!-- headerDoc=instm;  uid=//apple_ref/cpp/instm/LXDMXEthernet/sendDMX/void/(EthernetUDP,IPAddress);   name=LXDMXEthernet::sendDMX -->
+<a name="//apple_ref/cpp/instm/LXDMXEthernet/sendDMX/void/(EthernetUDP,IPAddress)"></a>
+<h3><a name="sendDMX">sendDMX</a></h3>
+<hr class="afterName"><p><!-- headerDoc=abstract;uid=//apple_ref/cpp/instm/LXDMXEthernet/sendDMX/void/(EthernetUDP,IPAddress);name=start --><!-- begin abstract --><p>send the contents of the _packet_buffer to the address to_ip
+<!-- end abstract --><!-- headerDoc=abstract;uid=//apple_ref/cpp/instm/LXDMXEthernet/sendDMX/void/(EthernetUDP,IPAddress);name=end --></p>
+<div class='declaration_indent'>
+<pre><tt>public</tt>
+<br><span class="keyword">virtual</span> <!-- a logicalPath="//apple_ref/cpp/cl/void //apple_ref/cpp/tdef/void //apple_ref/cpp/tag/void //apple_ref/cpp/struct/void //apple_ref/cpp/intf/void //apple_ref/doc/anysymbol/void" machineGenerated="true" --><span class="type">void</span><!-- /a --> <!-- a logicalPath="//apple_ref/cpp/instm/LXDMXEthernet/sendDMX //apple_ref/cpp/clm/LXDMXEthernet/sendDMX //apple_ref/cpp/intfcm/LXDMXEthernet/sendDMX //apple_ref/cpp/intfm/LXDMXEthernet/sendDMX //apple_ref/cpp/func/sendDMX //apple_ref/cpp/ftmplt/LXDMXEthernet/sendDMX //apple_ref/cpp/defn/sendDMX //apple_ref/cpp/macro/sendDMX //apple_ref/doc/anysymbol/sendDMX" machineGenerated="true" --><span class="function">sendDMX</span><!-- /a --> (
+    <!-- a logicalPath="//apple_ref/cpp/cl/EthernetUDP //apple_ref/cpp/tdef/EthernetUDP //apple_ref/cpp/tag/EthernetUDP //apple_ref/cpp/struct/EthernetUDP //apple_ref/cpp/intf/EthernetUDP //apple_ref/doc/anysymbol/EthernetUDP" machineGenerated="true" --><span class="type">EthernetUDP</span><!-- /a --> <span class="param">eUDP</span>,
+    <!-- a logicalPath="//apple_ref/cpp/cl/IPAddress //apple_ref/cpp/tdef/IPAddress //apple_ref/cpp/tag/IPAddress //apple_ref/cpp/struct/IPAddress //apple_ref/cpp/intf/IPAddress //apple_ref/doc/anysymbol/IPAddress" machineGenerated="true" --><span class="type">IPAddress</span><!-- /a --> <span class="param">to_ip</span> ); </pre>
+</div>
+<hr class="betweenAPIEntries"><!-- headerDoc=instm;  uid=//apple_ref/cpp/instm/LXDMXEthernet/setNumberOfSlots/void/(int);   name=LXDMXEthernet::setNumberOfSlots -->
 <a name="//apple_ref/cpp/instm/LXDMXEthernet/setNumberOfSlots/void/(int)"></a>
 <h3><a name="setNumberOfSlots">setNumberOfSlots</a></h3>
 <hr class="afterName"><p><!-- headerDoc=abstract;uid=//apple_ref/cpp/instm/LXDMXEthernet/setNumberOfSlots/void/(int);name=start --><!-- begin abstract --><p>set number of slots (aka addresses or channels)
@@ -451,7 +495,7 @@ See the code at the bottom of LXDMXEthernet.h
 <!-- begin discussion --><!-- headerDoc=discussion;uid=//apple_ref/cpp/instm/LXDMXEthernet/universe/uint8_t/();name=start --><p>First universe is zero for Art-Net and one for sACN E1.31.
 <!-- headerDoc=discussion;uid=//apple_ref/cpp/instm/LXDMXEthernet/universe/uint8_t/();name=end --><!-- end discussion -->
 <p class="gapBeforeFooter">&nbsp;</p><hr class="afterFooter"><div class="hd_copyright_and_timestamp">
-<p class="hd_timestamp">Last Updated: Tuesday, October 13, 2015
+<p class="hd_timestamp">Last Updated: Saturday, January 30, 2016
 </p></div>
 </td></tr></table>
 </body></html>

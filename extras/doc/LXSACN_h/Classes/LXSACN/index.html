@@ -282,6 +282,15 @@ packets from the first source from which it receives an E1.31 DMX packet.
 <dt><tt><a href="index.html#//apple_ref/cpp/instm/LXSACN/getSlot/uint8_t/(int)" target="_top">getSlot</a></tt></dt>
 <dd><p>get level data from slot/address/channel
 </dd>
+<dt><tt><a href="index.html#//apple_ref/cpp/instm/LXSACN/initialize/void/(uint8_t*)" target="_top">initialize</a></tt></dt>
+<dd><p>initialize data structures
+</dd>
+<dt><tt><a href="index.html#//apple_ref/cpp/instm/LXSACN/LXSACN//()" target="_top">LXSACN()</a></tt></dt>
+<dd><p>constructor for LXSACN
+</dd>
+<dt><tt><a href="index.html#//apple_ref/cpp/instm/LXSACN/LXSACN//(uint8_t*)" target="_top">LXSACN(uint8_t *)</a></tt></dt>
+<dd><p>constructor for LXSACN with external buffer fro UDP packets
+</dd>
 <dt><tt><a href="index.html#//apple_ref/cpp/instm/LXSACN/parse_framing_layer/uint16_t/(uint16_t)" target="_top">parse_framing_layer</a></tt></dt>
 <dd><p>checks the buffer for the sACN header and root layer size
 </dd>
@@ -290,6 +299,9 @@ packets from the first source from which it receives an E1.31 DMX packet.
 </dd>
 <dt><tt><a href="index.html#//apple_ref/cpp/instm/LXSACN/readDMXPacket/uint8_t/(EthernetUDP)" target="_top">readDMXPacket</a></tt></dt>
 <dd><p>read UDP packet
+</dd>
+<dt><tt><a href="index.html#//apple_ref/cpp/instm/LXSACN/readDMXPacketContents/uint8_t/(EthernetUDP,uint16_t)" target="_top">readDMXPacketContents</a></tt></dt>
+<dd><p>read contents of packet from _packet_buffer
 </dd>
 <dt><tt><a href="index.html#//apple_ref/cpp/instm/LXSACN/readSACNPacket/uint16_t/(EthernetUDP)" target="_top">readSACNPacket</a></tt></dt>
 <dd><p>process packet, reading it into _packet_buffer
@@ -314,6 +326,9 @@ packets from the first source from which it receives an E1.31 DMX packet.
 </dd>
 <dt><tt><a href="index.html#//apple_ref/cpp/instm/LXSACN/universe/uint8_t/()" target="_top">universe</a></tt></dt>
 <dd><p>universe for sending and receiving dmx
+</dd>
+<dt><tt><a href="index.html#//apple_ref/cpp/instm/LXSACN/~LXSACN//()" target="_top">~LXSACN</a></tt></dt>
+<dd><p>destructor for LXSACN  (frees packet buffer if allocated with constructor)
 </dd>
 </dl>
 <hr class="betweenAPIEntries"><!-- headerDoc=instm;  uid=//apple_ref/cpp/instm/LXSACN/dmxData/uint8_t*/();   name=LXSACN::dmxData -->
@@ -358,7 +373,45 @@ packets from the first source from which it receives an E1.31 DMX packet.
 </div>
 <h5 class="tight"><font face="Lucida Grande,Helvetica,Arial">Return Value</font></h5><p><!-- begin return value --><p>level for slot (0-255)
 
-<!-- end return value --></p><hr class="betweenAPIEntries"><!-- headerDoc=instm;  uid=//apple_ref/cpp/instm/LXSACN/parse_framing_layer/uint16_t/(uint16_t);   name=LXSACN::parse_framing_layer -->
+<!-- end return value --></p><hr class="betweenAPIEntries"><!-- headerDoc=instm;  uid=//apple_ref/cpp/instm/LXSACN/initialize/void/(uint8_t*);   name=LXSACN::initialize -->
+<a name="//apple_ref/cpp/instm/LXSACN/initialize/void/(uint8_t*)"></a>
+<h3><a name="initialize">initialize</a></h3>
+<hr class="afterName"><p><!-- headerDoc=abstract;uid=//apple_ref/cpp/instm/LXSACN/initialize/void/(uint8_t*);name=start --><!-- begin abstract --><p>initialize data structures
+<!-- end abstract --><!-- headerDoc=abstract;uid=//apple_ref/cpp/instm/LXSACN/initialize/void/(uint8_t*);name=end --></p>
+<div class='declaration_indent'>
+<pre><tt>private</tt>
+<br><!-- a logicalPath="//apple_ref/cpp/cl/void //apple_ref/cpp/tdef/void //apple_ref/cpp/tag/void //apple_ref/cpp/struct/void //apple_ref/cpp/intf/void //apple_ref/doc/anysymbol/void" machineGenerated="true" --><span class="type">void</span><!-- /a --> <!-- a logicalPath="//apple_ref/cpp/instm/LXSACN/initialize //apple_ref/cpp/clm/LXSACN/initialize //apple_ref/cpp/intfcm/LXSACN/initialize //apple_ref/cpp/intfm/LXSACN/initialize //apple_ref/cpp/func/initialize //apple_ref/cpp/ftmplt/LXSACN/initialize //apple_ref/cpp/defn/initialize //apple_ref/cpp/macro/initialize //apple_ref/doc/anysymbol/initialize" machineGenerated="true" --><span class="function">initialize</span><!-- /a --> (
+    <!-- a logicalPath="//apple_ref/cpp/cl/uint8_t //apple_ref/cpp/tdef/uint8_t //apple_ref/cpp/tag/uint8_t //apple_ref/cpp/struct/uint8_t //apple_ref/cpp/intf/uint8_t //apple_ref/doc/anysymbol/uint8_t" machineGenerated="true" --><span class="type">uint8_t</span><!-- /a --> <span class="type">*</span><span class="param">b</span> ); </pre>
+</div>
+<hr class="betweenAPIEntries"><!-- headerDoc=instm;  uid=//apple_ref/cpp/instm/LXSACN/LXSACN//();   name=LXSACN::LXSACN -->
+<a name="//apple_ref/cpp/instm/LXSACN/LXSACN//()"></a>
+<h3><a name="LXSACN()">LXSACN()</a></h3>
+<hr class="afterName"><p><!-- headerDoc=abstract;uid=//apple_ref/cpp/instm/LXSACN/LXSACN//();name=start --><!-- begin abstract --><p>constructor for LXSACN
+<!-- end abstract --><!-- headerDoc=abstract;uid=//apple_ref/cpp/instm/LXSACN/LXSACN//();name=end --></p>
+<div class='declaration_indent'>
+<pre><tt>public</tt>
+<br><!-- a logicalPath="//apple_ref/cpp/instm/LXSACN/LXSACN //apple_ref/cpp/clm/LXSACN/LXSACN //apple_ref/cpp/intfcm/LXSACN/LXSACN //apple_ref/cpp/intfm/LXSACN/LXSACN //apple_ref/cpp/func/LXSACN //apple_ref/cpp/ftmplt/LXSACN/LXSACN //apple_ref/cpp/defn/LXSACN //apple_ref/cpp/macro/LXSACN //apple_ref/doc/anysymbol/LXSACN" machineGenerated="true" --><span class="function">LXSACN</span><!-- /a --> (
+    <span class="param">void</span> ); </pre>
+</div>
+<hr class="betweenAPIEntries"><!-- headerDoc=instm;  uid=//apple_ref/cpp/instm/LXSACN/LXSACN//(uint8_t*);   name=LXSACN::LXSACN -->
+<a name="//apple_ref/cpp/instm/LXSACN/LXSACN//(uint8_t*)"></a>
+<h3><a name="LXSACN(uint8_t*)">LXSACN(uint8_t *)</a></h3>
+<hr class="afterName"><p><!-- headerDoc=abstract;uid=//apple_ref/cpp/instm/LXSACN/LXSACN//(uint8_t*);name=start --><!-- begin abstract --><p>constructor for LXSACN with external buffer fro UDP packets
+<!-- end abstract --><!-- headerDoc=abstract;uid=//apple_ref/cpp/instm/LXSACN/LXSACN//(uint8_t*);name=end --></p>
+<div class='declaration_indent'>
+<pre><tt>public</tt>
+<br><!-- a logicalPath="//apple_ref/cpp/instm/LXSACN/LXSACN //apple_ref/cpp/clm/LXSACN/LXSACN //apple_ref/cpp/intfcm/LXSACN/LXSACN //apple_ref/cpp/intfm/LXSACN/LXSACN //apple_ref/cpp/func/LXSACN //apple_ref/cpp/ftmplt/LXSACN/LXSACN //apple_ref/cpp/defn/LXSACN //apple_ref/cpp/macro/LXSACN //apple_ref/doc/anysymbol/LXSACN" machineGenerated="true" --><span class="function">LXSACN</span><!-- /a --> (
+    <!-- a logicalPath="//apple_ref/cpp/cl/uint8_t //apple_ref/cpp/tdef/uint8_t //apple_ref/cpp/tag/uint8_t //apple_ref/cpp/struct/uint8_t //apple_ref/cpp/intf/uint8_t //apple_ref/doc/anysymbol/uint8_t" machineGenerated="true" --><span class="type">uint8_t</span><!-- /a --> <span class="type">*</span><span class="param">buffer</span> ); </pre>
+</div>
+<h5 class="tight"><font face="Lucida Grande,Helvetica,Arial">Parameters</font></h5>
+<div class='param_indent'>
+<dl>
+<dt><!-- headerDoc=functionparam;  uid=//apple_ref/doc/functionparam/LXSACN/LXSACN/external;   name=LXSACN::external -->
+<a name="//apple_ref/doc/functionparam/LXSACN/LXSACN/external"></a>
+<code>external</code></dt><dd><p>packet buffer</dd>
+</dl>
+</div>
+<hr class="betweenAPIEntries"><!-- headerDoc=instm;  uid=//apple_ref/cpp/instm/LXSACN/parse_framing_layer/uint16_t/(uint16_t);   name=LXSACN::parse_framing_layer -->
 <a name="//apple_ref/cpp/instm/LXSACN/parse_framing_layer/uint16_t/(uint16_t)"></a>
 <h3><a name="parse_framing_layer">parse_framing_layer</a></h3>
 <hr class="afterName"><p><!-- headerDoc=abstract;uid=//apple_ref/cpp/instm/LXSACN/parse_framing_layer/uint16_t/(uint16_t);name=start --><!-- begin abstract --><p>checks the buffer for the sACN header and root layer size
@@ -396,9 +449,36 @@ packets from the first source from which it receives an E1.31 DMX packet.
 <code>eUDP</code></dt><dd><p>EthernetUDP object to be used for getting UDP packet</dd>
 </dl>
 </div>
-<h5 class="tight"><font face="Lucida Grande,Helvetica,Arial">Return Value</font></h5><p><!-- begin return value --><p>1 if packet contains dmx
+<h5 class="tight"><font face="Lucida Grande,Helvetica,Arial">Return Value</font></h5><p><!-- begin return value --><p>RESULT_NONE || RESULT_DMX_RECEIVED
 
-<!-- end return value --></p><hr class="betweenAPIEntries"><!-- headerDoc=instm;  uid=//apple_ref/cpp/instm/LXSACN/readSACNPacket/uint16_t/(EthernetUDP);   name=LXSACN::readSACNPacket -->
+<!-- end return value --></p><hr class="betweenAPIEntries"><!-- headerDoc=instm;  uid=//apple_ref/cpp/instm/LXSACN/readDMXPacketContents/uint8_t/(EthernetUDP,uint16_t);   name=LXSACN::readDMXPacketContents -->
+<a name="//apple_ref/cpp/instm/LXSACN/readDMXPacketContents/uint8_t/(EthernetUDP,uint16_t)"></a>
+<h3><a name="readDMXPacketContents">readDMXPacketContents</a></h3>
+<hr class="afterName"><p><!-- headerDoc=abstract;uid=//apple_ref/cpp/instm/LXSACN/readDMXPacketContents/uint8_t/(EthernetUDP,uint16_t);name=start --><!-- begin abstract --><p>read contents of packet from _packet_buffer
+<!-- end abstract --><!-- headerDoc=abstract;uid=//apple_ref/cpp/instm/LXSACN/readDMXPacketContents/uint8_t/(EthernetUDP,uint16_t);name=end --></p>
+<div class='declaration_indent'>
+<pre><tt>public</tt>
+<br><span class="keyword">virtual</span> <!-- a logicalPath="//apple_ref/cpp/cl/uint8_t //apple_ref/cpp/tdef/uint8_t //apple_ref/cpp/tag/uint8_t //apple_ref/cpp/struct/uint8_t //apple_ref/cpp/intf/uint8_t //apple_ref/doc/anysymbol/uint8_t" machineGenerated="true" --><span class="type">uint8_t</span><!-- /a --> <!-- a logicalPath="//apple_ref/cpp/instm/LXSACN/readDMXPacketContents //apple_ref/cpp/clm/LXSACN/readDMXPacketContents //apple_ref/cpp/intfcm/LXSACN/readDMXPacketContents //apple_ref/cpp/intfm/LXSACN/readDMXPacketContents //apple_ref/cpp/func/readDMXPacketContents //apple_ref/cpp/ftmplt/LXSACN/readDMXPacketContents //apple_ref/cpp/defn/readDMXPacketContents //apple_ref/cpp/macro/readDMXPacketContents //apple_ref/doc/anysymbol/readDMXPacketContents" machineGenerated="true" --><span class="function">readDMXPacketContents</span><!-- /a --> (
+    <!-- a logicalPath="//apple_ref/cpp/cl/EthernetUDP //apple_ref/cpp/tdef/EthernetUDP //apple_ref/cpp/tag/EthernetUDP //apple_ref/cpp/struct/EthernetUDP //apple_ref/cpp/intf/EthernetUDP //apple_ref/doc/anysymbol/EthernetUDP" machineGenerated="true" --><span class="type">EthernetUDP</span><!-- /a --> <span class="param">eUDP</span>,
+    <!-- a logicalPath="//apple_ref/cpp/cl/uint16_t //apple_ref/cpp/tdef/uint16_t //apple_ref/cpp/tag/uint16_t //apple_ref/cpp/struct/uint16_t //apple_ref/cpp/intf/uint16_t //apple_ref/doc/anysymbol/uint16_t" machineGenerated="true" --><span class="type">uint16_t</span><!-- /a --> <span class="param">packetSize</span> ); </pre>
+</div>
+<h5 class="tight"><font face="Lucida Grande,Helvetica,Arial">Parameters</font></h5>
+<div class='param_indent'>
+<dl>
+<dt><!-- headerDoc=functionparam;  uid=//apple_ref/doc/functionparam/LXSACN/readDMXPacketContents/eUDP;   name=readDMXPacketContents::eUDP -->
+<a name="//apple_ref/doc/functionparam/LXSACN/readDMXPacketContents/eUDP"></a>
+<code>eUDP</code></dt><dd><p>EthernetUDP</dd>
+<dt><!-- headerDoc=functionparam;  uid=//apple_ref/doc/functionparam/LXSACN/readDMXPacketContents/packetSize;   name=readDMXPacketContents::packetSize -->
+<a name="//apple_ref/doc/functionparam/LXSACN/readDMXPacketContents/packetSize"></a>
+<code>packetSize</code></dt><dd><p>size of received packet</dd>
+</dl>
+</div>
+<h5 class="tight"><font face="Lucida Grande,Helvetica,Arial">Return Value</font></h5><p><!-- begin return value --><p>RESULT_NONE || RESULT_DMX_RECEIVED
+
+<!-- end return value --></p><h5 class="tight"><font face="Lucida Grande,Helvetica,Arial">Discussion</font></h5>
+<!-- begin discussion --><!-- headerDoc=discussion;uid=//apple_ref/cpp/instm/LXSACN/readDMXPacketContents/uint8_t/(EthernetUDP,uint16_t);name=start --><p>_packet_buffer should already contain packet payload when this is called
+<!-- headerDoc=discussion;uid=//apple_ref/cpp/instm/LXSACN/readDMXPacketContents/uint8_t/(EthernetUDP,uint16_t);name=end --><!-- end discussion -->
+<hr class="betweenAPIEntries"><!-- headerDoc=instm;  uid=//apple_ref/cpp/instm/LXSACN/readSACNPacket/uint16_t/(EthernetUDP);   name=LXSACN::readSACNPacket -->
 <a name="//apple_ref/cpp/instm/LXSACN/readSACNPacket/uint16_t/(EthernetUDP)"></a>
 <h3><a name="readSACNPacket">readSACNPacket</a></h3>
 <hr class="afterName"><p><!-- headerDoc=abstract;uid=//apple_ref/cpp/instm/LXSACN/readSACNPacket/uint16_t/(EthernetUDP);name=start --><!-- begin abstract --><p>process packet, reading it into _packet_buffer
@@ -549,14 +629,36 @@ packets from the first source from which it receives an E1.31 DMX packet.
 <!-- end return value --></p><h5 class="tight"><font face="Lucida Grande,Helvetica,Arial">Discussion</font></h5>
 <!-- begin discussion --><!-- headerDoc=discussion;uid=//apple_ref/cpp/instm/LXSACN/universe/uint8_t/();name=start --><p>First universe is one for sACN E1.31.  Range is 1-255 in this implementation, 1-32767 in full E1.31.
 <!-- headerDoc=discussion;uid=//apple_ref/cpp/instm/LXSACN/universe/uint8_t/();name=end --><!-- end discussion -->
+<hr class="betweenAPIEntries"><!-- headerDoc=instm;  uid=//apple_ref/cpp/instm/LXSACN/~LXSACN//();   name=LXSACN::~LXSACN -->
+<a name="//apple_ref/cpp/instm/LXSACN/~LXSACN//()"></a>
+<h3><a name="~LXSACN">~LXSACN</a></h3>
+<hr class="afterName"><p><!-- headerDoc=abstract;uid=//apple_ref/cpp/instm/LXSACN/~LXSACN//();name=start --><!-- begin abstract --><p>destructor for LXSACN  (frees packet buffer if allocated with constructor)
+<!-- end abstract --><!-- headerDoc=abstract;uid=//apple_ref/cpp/instm/LXSACN/~LXSACN//();name=end --></p>
+<div class='declaration_indent'>
+<pre><tt>public</tt>
+<br>~<!-- a logicalPath="//apple_ref/cpp/instm/LXSACN/LXSACN //apple_ref/cpp/clm/LXSACN/LXSACN //apple_ref/cpp/intfcm/LXSACN/LXSACN //apple_ref/cpp/intfm/LXSACN/LXSACN //apple_ref/cpp/func/LXSACN //apple_ref/cpp/ftmplt/LXSACN/LXSACN //apple_ref/cpp/defn/LXSACN //apple_ref/cpp/macro/LXSACN //apple_ref/doc/anysymbol/LXSACN" machineGenerated="true" --><span class="function">LXSACN</span><!-- /a --> (
+    <span class="param">void</span> ); </pre>
+</div>
 <hr class="betweenSections">
 <a name="HeaderDoc_vars"></a>
 <h2 class="h2tight">Member Data</h2>
 <dl>
+<dt><tt><a href="index.html#//apple_ref/cpp/data/LXSACN/_owns_buffer" target="_top">_owns_buffer</a></tt></dt>
+<dd><p>indicates was created by constructor
+</dd>
 <dt><tt><a href="index.html#//apple_ref/cpp/data/LXSACN/_packet_buffer" target="_top">_packet_buffer</a></tt></dt>
 <dd><p>buffer that holds contents of incoming or outgoing packet
 </dd>
 </dl>
+<hr class="betweenAPIEntries"><!-- headerDoc=data;  uid=//apple_ref/cpp/data/LXSACN/_owns_buffer;   name=LXSACN::_owns_buffer -->
+<a name="//apple_ref/cpp/data/LXSACN/_owns_buffer"></a>
+<h3><a name="_owns_buffer">_owns_buffer</a></h3>
+<hr class="afterName"><p><!-- headerDoc=abstract;uid=//apple_ref/cpp/data/LXSACN/_owns_buffer;name=start --><!-- begin abstract --><p>indicates was created by constructor
+<!-- end abstract --><!-- headerDoc=abstract;uid=//apple_ref/cpp/data/LXSACN/_owns_buffer;name=end --></p>
+<div class='declaration_indent'>
+<pre><tt>private</tt>
+<br><!-- a logicalPath="//apple_ref/cpp/cl/uint8_t //apple_ref/cpp/tdef/uint8_t //apple_ref/cpp/tag/uint8_t //apple_ref/cpp/struct/uint8_t //apple_ref/cpp/intf/uint8_t //apple_ref/doc/anysymbol/uint8_t" machineGenerated="true" --><span class="type">uint8_t</span><!-- /a --> <!-- a logicalPath="//apple_ref/cpp/econst/_owns_buffer //apple_ref/cpp/data/LXSACN/_owns_buffer //apple_ref/cpp/data/_owns_buffer //apple_ref/cpp/clconst/LXSACN/_owns_buffer " machineGenerated="true" --><span class="var">_owns_buffer</span><!-- /a -->; </pre>
+</div>
 <hr class="betweenAPIEntries"><!-- headerDoc=data;  uid=//apple_ref/cpp/data/LXSACN/_packet_buffer;   name=LXSACN::_packet_buffer -->
 <a name="//apple_ref/cpp/data/LXSACN/_packet_buffer"></a>
 <h3><a name="_packet_buffer">_packet_buffer</a></h3>
@@ -564,7 +666,7 @@ packets from the first source from which it receives an E1.31 DMX packet.
 <!-- end abstract --><!-- headerDoc=abstract;uid=//apple_ref/cpp/data/LXSACN/_packet_buffer;name=end --></p>
 <div class='declaration_indent'>
 <pre><tt>private</tt>
-<br><!-- a logicalPath="//apple_ref/cpp/cl/uint8_t //apple_ref/cpp/tdef/uint8_t //apple_ref/cpp/tag/uint8_t //apple_ref/cpp/struct/uint8_t //apple_ref/cpp/intf/uint8_t //apple_ref/doc/anysymbol/uint8_t" machineGenerated="true" --><span class="type">uint8_t</span><!-- /a --> <!-- a logicalPath="//apple_ref/cpp/cl/_packet_buffer //apple_ref/cpp/tdef/_packet_buffer //apple_ref/cpp/tag/_packet_buffer //apple_ref/cpp/struct/_packet_buffer //apple_ref/cpp/intf/_packet_buffer //apple_ref/doc/anysymbol/_packet_buffer" machineGenerated="true" --><span class="type">_packet_buffer</span><!-- /a -->[<!-- a logicalPath="//apple_ref/cpp/cl/SACN_BUFFER_MAX //apple_ref/cpp/tdef/SACN_BUFFER_MAX //apple_ref/cpp/tag/SACN_BUFFER_MAX //apple_ref/cpp/struct/SACN_BUFFER_MAX //apple_ref/cpp/intf/SACN_BUFFER_MAX //apple_ref/doc/anysymbol/SACN_BUFFER_MAX" machineGenerated="true" --><span class="type">SACN_BUFFER_MAX</span><!-- /a -->]; </pre>
+<br><!-- a logicalPath="//apple_ref/cpp/cl/uint8_t //apple_ref/cpp/tdef/uint8_t //apple_ref/cpp/tag/uint8_t //apple_ref/cpp/struct/uint8_t //apple_ref/cpp/intf/uint8_t //apple_ref/doc/anysymbol/uint8_t" machineGenerated="true" --><span class="type">uint8_t</span><!-- /a --><span class="type">*</span> <!-- a logicalPath="//apple_ref/cpp/econst/_packet_buffer //apple_ref/cpp/data/LXSACN/_packet_buffer //apple_ref/cpp/data/_packet_buffer //apple_ref/cpp/clconst/LXSACN/_packet_buffer " machineGenerated="true" --><span class="var">_packet_buffer</span><!-- /a -->; </pre>
 </div>
 <h5 class="tight"><font face="Lucida Grande,Helvetica,Arial">Discussion</font></h5>
 <!-- begin discussion --><!-- headerDoc=discussion;uid=//apple_ref/cpp/data/LXSACN/_packet_buffer;name=start --><p>There is no double buffer for dmx data.
@@ -572,7 +674,7 @@ readSACNPacket fills the buffer with the payload of the incoming packet.
 Previous dmx data is invalidated.
 <!-- headerDoc=discussion;uid=//apple_ref/cpp/data/LXSACN/_packet_buffer;name=end --><!-- end discussion -->
 <p class="gapBeforeFooter">&nbsp;</p><hr class="afterFooter"><div class="hd_copyright_and_timestamp">
-<p class="hd_timestamp">Last Updated: Tuesday, October 13, 2015
+<p class="hd_timestamp">Last Updated: Saturday, January 30, 2016
 </p></div>
 </td></tr></table>
 </body></html>

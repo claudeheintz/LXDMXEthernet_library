@@ -285,6 +285,15 @@ reply directly to the sender of the poll.
 <dt><tt><a href="index.html#//apple_ref/cpp/instm/LXArtNet/getSlot/uint8_t/(int)" target="_top">getSlot</a></tt></dt>
 <dd><p>get level data from slot/address/channel
 </dd>
+<dt><tt><a href="index.html#//apple_ref/cpp/instm/LXArtNet/initialize/void/(uint8_t*)" target="_top">initialize</a></tt></dt>
+<dd><p>initialize data structures
+</dd>
+<dt><tt><a href="index.html#//apple_ref/cpp/instm/LXArtNet/initializePollReply/void/()" target="_top">initializePollReply</a></tt></dt>
+<dd><p>initialize poll reply buffer
+</dd>
+<dt><tt><a href="index.html#//apple_ref/cpp/instm/LXArtNet/LXArtNet//(IPAddress,IPAddress,uint8_t*)" target="_top">LXArtNet</a></tt></dt>
+<dd><p>constructor creates instance with external buffer for UDP packet
+</dd>
 <dt><tt><a href="index.html#//apple_ref/cpp/instm/LXArtNet/LXArtNet//(IPAddress)" target="_top">LXArtNet(IPAddress)</a></tt></dt>
 <dd><p>constructor with address used for ArtPollReply
 </dd>
@@ -303,14 +312,26 @@ reply directly to the sender of the poll.
 <dt><tt><a href="index.html#//apple_ref/cpp/instm/LXArtNet/readArtNetPacket/uint16_t/(EthernetUDP)" target="_top">readArtNetPacket</a></tt></dt>
 <dd><p>process packet, reading it into _packet_buffer
 </dd>
+<dt><tt><a href="index.html#//apple_ref/cpp/instm/LXArtNet/readArtNetPacketContents/uint16_t/(EthernetUDP,uint16_t)" target="_top">readArtNetPacketContents</a></tt></dt>
+<dd><p>read contents of packet from _packet_buffer
+</dd>
 <dt><tt><a href="index.html#//apple_ref/cpp/instm/LXArtNet/readDMXPacket/uint8_t/(EthernetUDP)" target="_top">readDMXPacket</a></tt></dt>
 <dd><p>read UDP packet
+</dd>
+<dt><tt><a href="index.html#//apple_ref/cpp/instm/LXArtNet/readDMXPacketContents/uint8_t/(EthernetUDP,uint16_t)" target="_top">readDMXPacketContents</a></tt></dt>
+<dd><p>read contents of packet from _packet_buffer
+</dd>
+<dt><tt><a href="index.html#//apple_ref/cpp/instm/LXArtNet/replyData/uint8_t*/()" target="_top">replyData</a></tt></dt>
+<dd><p>direct pointer to poll reply packet contents
 </dd>
 <dt><tt><a href="index.html#//apple_ref/cpp/instm/LXArtNet/send_art_poll_reply/void/(EthernetUDP)" target="_top">send_art_poll_reply</a></tt></dt>
 <dd><p>send ArtPoll Reply packet for dmx output from network
 </dd>
 <dt><tt><a href="index.html#//apple_ref/cpp/instm/LXArtNet/sendDMX/void/(EthernetUDP,IPAddress)" target="_top">sendDMX</a></tt></dt>
 <dd><p>send Art-Net ArtDMX packet for dmx output from network
+</dd>
+<dt><tt><a href="index.html#//apple_ref/cpp/instm/LXArtNet/setNetAddress/void/(uint8_t)" target="_top">setNetAddress</a></tt></dt>
+<dd><p>set net for sending and receiving
 </dd>
 <dt><tt><a href="index.html#//apple_ref/cpp/instm/LXArtNet/setNumberOfSlots/void/(int)" target="_top">setNumberOfSlots</a></tt></dt>
 <dd><p>set number of slots (aka addresses or channels)
@@ -332,6 +353,9 @@ reply directly to the sender of the poll.
 </dd>
 <dt><tt><a href="index.html#//apple_ref/cpp/instm/LXArtNet/universe/uint8_t/()" target="_top">universe</a></tt></dt>
 <dd><p>universe for sending and receiving dmx
+</dd>
+<dt><tt><a href="index.html#//apple_ref/cpp/instm/LXArtNet/~LXArtNet//()" target="_top">~LXArtNet</a></tt></dt>
+<dd><p>destructor for LXArtNet (frees packet buffer if allocated with constructor)
 </dd>
 </dl>
 <hr class="betweenAPIEntries"><!-- headerDoc=instm;  uid=//apple_ref/cpp/instm/LXArtNet/dmxData/uint8_t*/();   name=LXArtNet::dmxData -->
@@ -376,7 +400,53 @@ reply directly to the sender of the poll.
 </div>
 <h5 class="tight"><font face="Lucida Grande,Helvetica,Arial">Return Value</font></h5><p><!-- begin return value --><p>level for slot (0-255)
 
-<!-- end return value --></p><hr class="betweenAPIEntries"><!-- headerDoc=instm;  uid=//apple_ref/cpp/instm/LXArtNet/LXArtNet//(IPAddress);   name=LXArtNet::LXArtNet -->
+<!-- end return value --></p><hr class="betweenAPIEntries"><!-- headerDoc=instm;  uid=//apple_ref/cpp/instm/LXArtNet/initialize/void/(uint8_t*);   name=LXArtNet::initialize -->
+<a name="//apple_ref/cpp/instm/LXArtNet/initialize/void/(uint8_t*)"></a>
+<h3><a name="initialize">initialize</a></h3>
+<hr class="afterName"><p><!-- headerDoc=abstract;uid=//apple_ref/cpp/instm/LXArtNet/initialize/void/(uint8_t*);name=start --><!-- begin abstract --><p>initialize data structures
+<!-- end abstract --><!-- headerDoc=abstract;uid=//apple_ref/cpp/instm/LXArtNet/initialize/void/(uint8_t*);name=end --></p>
+<div class='declaration_indent'>
+<pre><tt>private</tt>
+<br><!-- a logicalPath="//apple_ref/cpp/cl/void //apple_ref/cpp/tdef/void //apple_ref/cpp/tag/void //apple_ref/cpp/struct/void //apple_ref/cpp/intf/void //apple_ref/doc/anysymbol/void" machineGenerated="true" --><span class="type">void</span><!-- /a --> <!-- a logicalPath="//apple_ref/cpp/instm/LXArtNet/initialize //apple_ref/cpp/clm/LXArtNet/initialize //apple_ref/cpp/intfcm/LXArtNet/initialize //apple_ref/cpp/intfm/LXArtNet/initialize //apple_ref/cpp/func/initialize //apple_ref/cpp/ftmplt/LXArtNet/initialize //apple_ref/cpp/defn/initialize //apple_ref/cpp/macro/initialize //apple_ref/doc/anysymbol/initialize" machineGenerated="true" --><span class="function">initialize</span><!-- /a --> (
+    <!-- a logicalPath="//apple_ref/cpp/cl/uint8_t //apple_ref/cpp/tdef/uint8_t //apple_ref/cpp/tag/uint8_t //apple_ref/cpp/struct/uint8_t //apple_ref/cpp/intf/uint8_t //apple_ref/doc/anysymbol/uint8_t" machineGenerated="true" --><span class="type">uint8_t</span><!-- /a --> <span class="type">*</span><span class="param">b</span> ); </pre>
+</div>
+<hr class="betweenAPIEntries"><!-- headerDoc=instm;  uid=//apple_ref/cpp/instm/LXArtNet/initializePollReply/void/();   name=LXArtNet::initializePollReply -->
+<a name="//apple_ref/cpp/instm/LXArtNet/initializePollReply/void/()"></a>
+<h3><a name="initializePollReply">initializePollReply</a></h3>
+<hr class="afterName"><p><!-- headerDoc=abstract;uid=//apple_ref/cpp/instm/LXArtNet/initializePollReply/void/();name=start --><!-- begin abstract --><p>initialize poll reply buffer
+<!-- end abstract --><!-- headerDoc=abstract;uid=//apple_ref/cpp/instm/LXArtNet/initializePollReply/void/();name=end --></p>
+<div class='declaration_indent'>
+<pre><tt>private</tt>
+<br><!-- a logicalPath="//apple_ref/cpp/cl/void //apple_ref/cpp/tdef/void //apple_ref/cpp/tag/void //apple_ref/cpp/struct/void //apple_ref/cpp/intf/void //apple_ref/doc/anysymbol/void" machineGenerated="true" --><span class="type">void</span><!-- /a --> <!-- a logicalPath="//apple_ref/cpp/instm/LXArtNet/initializePollReply //apple_ref/cpp/clm/LXArtNet/initializePollReply //apple_ref/cpp/intfcm/LXArtNet/initializePollReply //apple_ref/cpp/intfm/LXArtNet/initializePollReply //apple_ref/cpp/func/initializePollReply //apple_ref/cpp/ftmplt/LXArtNet/initializePollReply //apple_ref/cpp/defn/initializePollReply //apple_ref/cpp/macro/initializePollReply //apple_ref/doc/anysymbol/initializePollReply" machineGenerated="true" --><span class="function">initializePollReply</span><!-- /a --> (
+    <span class="param">void</span> ); </pre>
+</div>
+<hr class="betweenAPIEntries"><!-- headerDoc=instm;  uid=//apple_ref/cpp/instm/LXArtNet/LXArtNet//(IPAddress,IPAddress,uint8_t*);   name=LXArtNet::LXArtNet -->
+<a name="//apple_ref/cpp/instm/LXArtNet/LXArtNet//(IPAddress,IPAddress,uint8_t*)"></a>
+<h3><a name="LXArtNet">LXArtNet</a></h3>
+<hr class="afterName"><p><!-- headerDoc=abstract;uid=//apple_ref/cpp/instm/LXArtNet/LXArtNet//(IPAddress,IPAddress,uint8_t*);name=start --><!-- begin abstract --><p>constructor creates instance with external buffer for UDP packet
+<!-- end abstract --><!-- headerDoc=abstract;uid=//apple_ref/cpp/instm/LXArtNet/LXArtNet//(IPAddress,IPAddress,uint8_t*);name=end --></p>
+<div class='declaration_indent'>
+<pre><tt>public</tt>
+<br><!-- a logicalPath="//apple_ref/cpp/instm/LXArtNet/LXArtNet //apple_ref/cpp/clm/LXArtNet/LXArtNet //apple_ref/cpp/intfcm/LXArtNet/LXArtNet //apple_ref/cpp/intfm/LXArtNet/LXArtNet //apple_ref/cpp/func/LXArtNet //apple_ref/cpp/ftmplt/LXArtNet/LXArtNet //apple_ref/cpp/defn/LXArtNet //apple_ref/cpp/macro/LXArtNet //apple_ref/doc/anysymbol/LXArtNet" machineGenerated="true" --><span class="function">LXArtNet</span><!-- /a --> (
+    <!-- a logicalPath="//apple_ref/cpp/cl/IPAddress //apple_ref/cpp/tdef/IPAddress //apple_ref/cpp/tag/IPAddress //apple_ref/cpp/struct/IPAddress //apple_ref/cpp/intf/IPAddress //apple_ref/doc/anysymbol/IPAddress" machineGenerated="true" --><span class="type">IPAddress</span><!-- /a --> <span class="param">address</span>,
+    <!-- a logicalPath="//apple_ref/cpp/cl/IPAddress //apple_ref/cpp/tdef/IPAddress //apple_ref/cpp/tag/IPAddress //apple_ref/cpp/struct/IPAddress //apple_ref/cpp/intf/IPAddress //apple_ref/doc/anysymbol/IPAddress" machineGenerated="true" --><span class="type">IPAddress</span><!-- /a --> <span class="param">subnet_mask</span>,
+    <!-- a logicalPath="//apple_ref/cpp/cl/uint8_t //apple_ref/cpp/tdef/uint8_t //apple_ref/cpp/tag/uint8_t //apple_ref/cpp/struct/uint8_t //apple_ref/cpp/intf/uint8_t //apple_ref/doc/anysymbol/uint8_t" machineGenerated="true" --><span class="type">uint8_t</span><!-- /a --> <span class="type">*</span><span class="param">buffer</span> ); </pre>
+</div>
+<h5 class="tight"><font face="Lucida Grande,Helvetica,Arial">Parameters</font></h5>
+<div class='param_indent'>
+<dl>
+<dt><!-- headerDoc=functionparam;  uid=//apple_ref/doc/functionparam/LXArtNet/LXArtNet/address;   name=LXArtNet::address -->
+<a name="//apple_ref/doc/functionparam/LXArtNet/LXArtNet/address"></a>
+<code>address</code></dt><dd><p>sent in ArtPollReply</dd>
+<dt><!-- headerDoc=functionparam;  uid=//apple_ref/doc/functionparam/LXArtNet/LXArtNet/subnet_mask;   name=LXArtNet::subnet_mask -->
+<a name="//apple_ref/doc/functionparam/LXArtNet/LXArtNet/subnet_mask"></a>
+<code>subnet_mask</code></dt><dd><p>used to set broadcast address</dd>
+<dt><!-- headerDoc=functionparam;  uid=//apple_ref/doc/functionparam/LXArtNet/LXArtNet/buffer;   name=LXArtNet::buffer -->
+<a name="//apple_ref/doc/functionparam/LXArtNet/LXArtNet/buffer"></a>
+<code>buffer</code></dt><dd><p>external buffer for UDP packets</dd>
+</dl>
+</div>
+<hr class="betweenAPIEntries"><!-- headerDoc=instm;  uid=//apple_ref/cpp/instm/LXArtNet/LXArtNet//(IPAddress);   name=LXArtNet::LXArtNet -->
 <a name="//apple_ref/cpp/instm/LXArtNet/LXArtNet//(IPAddress)"></a>
 <h3><a name="LXArtNet(IPAddress)">LXArtNet(IPAddress)</a></h3>
 <hr class="afterName"><p><!-- headerDoc=abstract;uid=//apple_ref/cpp/instm/LXArtNet/LXArtNet//(IPAddress);name=start --><!-- begin abstract --><p>constructor with address used for ArtPollReply
@@ -475,6 +545,30 @@ reply directly to the sender of the poll.
 </div>
 <h5 class="tight"><font face="Lucida Grande,Helvetica,Arial">Return Value</font></h5><p><!-- begin return value --><p>Art-Net opcode of packet
 
+<!-- end return value --></p><hr class="betweenAPIEntries"><!-- headerDoc=instm;  uid=//apple_ref/cpp/instm/LXArtNet/readArtNetPacketContents/uint16_t/(EthernetUDP,uint16_t);   name=LXArtNet::readArtNetPacketContents -->
+<a name="//apple_ref/cpp/instm/LXArtNet/readArtNetPacketContents/uint16_t/(EthernetUDP,uint16_t)"></a>
+<h3><a name="readArtNetPacketContents">readArtNetPacketContents</a></h3>
+<hr class="afterName"><p><!-- headerDoc=abstract;uid=//apple_ref/cpp/instm/LXArtNet/readArtNetPacketContents/uint16_t/(EthernetUDP,uint16_t);name=start --><!-- begin abstract --><p>read contents of packet from _packet_buffer
+<!-- end abstract --><!-- headerDoc=abstract;uid=//apple_ref/cpp/instm/LXArtNet/readArtNetPacketContents/uint16_t/(EthernetUDP,uint16_t);name=end --></p>
+<div class='declaration_indent'>
+<pre><tt>public</tt>
+<br><!-- a logicalPath="//apple_ref/cpp/cl/uint16_t //apple_ref/cpp/tdef/uint16_t //apple_ref/cpp/tag/uint16_t //apple_ref/cpp/struct/uint16_t //apple_ref/cpp/intf/uint16_t //apple_ref/doc/anysymbol/uint16_t" machineGenerated="true" --><span class="type">uint16_t</span><!-- /a --> <!-- a logicalPath="//apple_ref/cpp/instm/LXArtNet/readArtNetPacketContents //apple_ref/cpp/clm/LXArtNet/readArtNetPacketContents //apple_ref/cpp/intfcm/LXArtNet/readArtNetPacketContents //apple_ref/cpp/intfm/LXArtNet/readArtNetPacketContents //apple_ref/cpp/func/readArtNetPacketContents //apple_ref/cpp/ftmplt/LXArtNet/readArtNetPacketContents //apple_ref/cpp/defn/readArtNetPacketContents //apple_ref/cpp/macro/readArtNetPacketContents //apple_ref/doc/anysymbol/readArtNetPacketContents" machineGenerated="true" --><span class="function">readArtNetPacketContents</span><!-- /a --> (
+    <!-- a logicalPath="//apple_ref/cpp/cl/EthernetUDP //apple_ref/cpp/tdef/EthernetUDP //apple_ref/cpp/tag/EthernetUDP //apple_ref/cpp/struct/EthernetUDP //apple_ref/cpp/intf/EthernetUDP //apple_ref/doc/anysymbol/EthernetUDP" machineGenerated="true" --><span class="type">EthernetUDP</span><!-- /a --> <span class="param">eUDP</span>,
+    <!-- a logicalPath="//apple_ref/cpp/cl/uint16_t //apple_ref/cpp/tdef/uint16_t //apple_ref/cpp/tag/uint16_t //apple_ref/cpp/struct/uint16_t //apple_ref/cpp/intf/uint16_t //apple_ref/doc/anysymbol/uint16_t" machineGenerated="true" --><span class="type">uint16_t</span><!-- /a --> <span class="param">packetSize</span> ); </pre>
+</div>
+<h5 class="tight"><font face="Lucida Grande,Helvetica,Arial">Parameters</font></h5>
+<div class='param_indent'>
+<dl>
+<dt><!-- headerDoc=functionparam;  uid=//apple_ref/doc/functionparam/LXArtNet/readArtNetPacketContents/wUDP;   name=readArtNetPacketContents::wUDP -->
+<a name="//apple_ref/doc/functionparam/LXArtNet/readArtNetPacketContents/wUDP"></a>
+<code>wUDP</code></dt><dd><p>WiFiUDP (used for Poll Reply if applicable)</dd>
+<dt><!-- headerDoc=functionparam;  uid=//apple_ref/doc/functionparam/LXArtNet/readArtNetPacketContents/packetSize;   name=readArtNetPacketContents::packetSize -->
+<a name="//apple_ref/doc/functionparam/LXArtNet/readArtNetPacketContents/packetSize"></a>
+<code>packetSize</code></dt><dd><p>size of received packet</dd>
+</dl>
+</div>
+<h5 class="tight"><font face="Lucida Grande,Helvetica,Arial">Return Value</font></h5><p><!-- begin return value --><p>Art-Net opcode of packet
+
 <!-- end return value --></p><hr class="betweenAPIEntries"><!-- headerDoc=instm;  uid=//apple_ref/cpp/instm/LXArtNet/readDMXPacket/uint8_t/(EthernetUDP);   name=LXArtNet::readDMXPacket -->
 <a name="//apple_ref/cpp/instm/LXArtNet/readDMXPacket/uint8_t/(EthernetUDP)"></a>
 <h3><a name="readDMXPacket">readDMXPacket</a></h3>
@@ -493,7 +587,46 @@ reply directly to the sender of the poll.
 <code>eUDP</code></dt><dd><p>EthernetUDP object to be used for getting UDP packet</dd>
 </dl>
 </div>
-<h5 class="tight"><font face="Lucida Grande,Helvetica,Arial">Return Value</font></h5><p><!-- begin return value --><p>1 if packet contains dmx
+<h5 class="tight"><font face="Lucida Grande,Helvetica,Arial">Return Value</font></h5><p><!-- begin return value --><p>RESULT_NONE || RESULT_DMX_RECEIVED || RESULT_PACKET_COMPLETE
+
+<!-- end return value --></p><hr class="betweenAPIEntries"><!-- headerDoc=instm;  uid=//apple_ref/cpp/instm/LXArtNet/readDMXPacketContents/uint8_t/(EthernetUDP,uint16_t);   name=LXArtNet::readDMXPacketContents -->
+<a name="//apple_ref/cpp/instm/LXArtNet/readDMXPacketContents/uint8_t/(EthernetUDP,uint16_t)"></a>
+<h3><a name="readDMXPacketContents">readDMXPacketContents</a></h3>
+<hr class="afterName"><p><!-- headerDoc=abstract;uid=//apple_ref/cpp/instm/LXArtNet/readDMXPacketContents/uint8_t/(EthernetUDP,uint16_t);name=start --><!-- begin abstract --><p>read contents of packet from _packet_buffer
+<!-- end abstract --><!-- headerDoc=abstract;uid=//apple_ref/cpp/instm/LXArtNet/readDMXPacketContents/uint8_t/(EthernetUDP,uint16_t);name=end --></p>
+<div class='declaration_indent'>
+<pre><tt>public</tt>
+<br><!-- a logicalPath="//apple_ref/cpp/cl/uint8_t //apple_ref/cpp/tdef/uint8_t //apple_ref/cpp/tag/uint8_t //apple_ref/cpp/struct/uint8_t //apple_ref/cpp/intf/uint8_t //apple_ref/doc/anysymbol/uint8_t" machineGenerated="true" --><span class="type">uint8_t</span><!-- /a --> <!-- a logicalPath="//apple_ref/cpp/instm/LXArtNet/readDMXPacketContents //apple_ref/cpp/clm/LXArtNet/readDMXPacketContents //apple_ref/cpp/intfcm/LXArtNet/readDMXPacketContents //apple_ref/cpp/intfm/LXArtNet/readDMXPacketContents //apple_ref/cpp/func/readDMXPacketContents //apple_ref/cpp/ftmplt/LXArtNet/readDMXPacketContents //apple_ref/cpp/defn/readDMXPacketContents //apple_ref/cpp/macro/readDMXPacketContents //apple_ref/doc/anysymbol/readDMXPacketContents" machineGenerated="true" --><span class="function">readDMXPacketContents</span><!-- /a --> (
+    <!-- a logicalPath="//apple_ref/cpp/cl/EthernetUDP //apple_ref/cpp/tdef/EthernetUDP //apple_ref/cpp/tag/EthernetUDP //apple_ref/cpp/struct/EthernetUDP //apple_ref/cpp/intf/EthernetUDP //apple_ref/doc/anysymbol/EthernetUDP" machineGenerated="true" --><span class="type">EthernetUDP</span><!-- /a --> <span class="param">eUDP</span>,
+    <!-- a logicalPath="//apple_ref/cpp/cl/uint16_t //apple_ref/cpp/tdef/uint16_t //apple_ref/cpp/tag/uint16_t //apple_ref/cpp/struct/uint16_t //apple_ref/cpp/intf/uint16_t //apple_ref/doc/anysymbol/uint16_t" machineGenerated="true" --><span class="type">uint16_t</span><!-- /a --> <span class="param">packetSize</span> ); </pre>
+</div>
+<h5 class="tight"><font face="Lucida Grande,Helvetica,Arial">Parameters</font></h5>
+<div class='param_indent'>
+<dl>
+<dt><!-- headerDoc=functionparam;  uid=//apple_ref/doc/functionparam/LXArtNet/readDMXPacketContents/wUDP;   name=readDMXPacketContents::wUDP -->
+<a name="//apple_ref/doc/functionparam/LXArtNet/readDMXPacketContents/wUDP"></a>
+<code>wUDP</code></dt><dd><p>WiFiUDP</dd>
+<dt><!-- headerDoc=functionparam;  uid=//apple_ref/doc/functionparam/LXArtNet/readDMXPacketContents/packetSize;   name=readDMXPacketContents::packetSize -->
+<a name="//apple_ref/doc/functionparam/LXArtNet/readDMXPacketContents/packetSize"></a>
+<code>packetSize</code></dt><dd><p>size of received packet</dd>
+</dl>
+</div>
+<h5 class="tight"><font face="Lucida Grande,Helvetica,Arial">Return Value</font></h5><p><!-- begin return value --><p>RESULT_NONE || RESULT_DMX_RECEIVED || RESULT_PACKET_COMPLETE
+
+<!-- end return value --></p><h5 class="tight"><font face="Lucida Grande,Helvetica,Arial">Discussion</font></h5>
+<!-- begin discussion --><!-- headerDoc=discussion;uid=//apple_ref/cpp/instm/LXArtNet/readDMXPacketContents/uint8_t/(EthernetUDP,uint16_t);name=start --><p>_packet_buffer should already contain packet payload when this is called
+<!-- headerDoc=discussion;uid=//apple_ref/cpp/instm/LXArtNet/readDMXPacketContents/uint8_t/(EthernetUDP,uint16_t);name=end --><!-- end discussion -->
+<hr class="betweenAPIEntries"><!-- headerDoc=instm;  uid=//apple_ref/cpp/instm/LXArtNet/replyData/uint8_t*/();   name=LXArtNet::replyData -->
+<a name="//apple_ref/cpp/instm/LXArtNet/replyData/uint8_t*/()"></a>
+<h3><a name="replyData">replyData</a></h3>
+<hr class="afterName"><p><!-- headerDoc=abstract;uid=//apple_ref/cpp/instm/LXArtNet/replyData/uint8_t*/();name=start --><!-- begin abstract --><p>direct pointer to poll reply packet contents
+<!-- end abstract --><!-- headerDoc=abstract;uid=//apple_ref/cpp/instm/LXArtNet/replyData/uint8_t*/();name=end --></p>
+<div class='declaration_indent'>
+<pre><tt>public</tt>
+<br><!-- a logicalPath="//apple_ref/cpp/cl/uint8_t //apple_ref/cpp/tdef/uint8_t //apple_ref/cpp/tag/uint8_t //apple_ref/cpp/struct/uint8_t //apple_ref/cpp/intf/uint8_t //apple_ref/doc/anysymbol/uint8_t" machineGenerated="true" --><span class="type">uint8_t</span><!-- /a --><span class="type">*</span> <!-- a logicalPath="//apple_ref/cpp/instm/LXArtNet/replyData //apple_ref/cpp/clm/LXArtNet/replyData //apple_ref/cpp/intfcm/LXArtNet/replyData //apple_ref/cpp/intfm/LXArtNet/replyData //apple_ref/cpp/func/replyData //apple_ref/cpp/ftmplt/LXArtNet/replyData //apple_ref/cpp/defn/replyData //apple_ref/cpp/macro/replyData //apple_ref/doc/anysymbol/replyData" machineGenerated="true" --><span class="function">replyData</span><!-- /a --> (
+    <span class="param">void</span> ); </pre>
+</div>
+<h5 class="tight"><font face="Lucida Grande,Helvetica,Arial">Return Value</font></h5><p><!-- begin return value --><p>uint8_t* to poll reply packet contents
 
 <!-- end return value --></p><hr class="betweenAPIEntries"><!-- headerDoc=instm;  uid=//apple_ref/cpp/instm/LXArtNet/send_art_poll_reply/void/(EthernetUDP);   name=LXArtNet::send_art_poll_reply -->
 <a name="//apple_ref/cpp/instm/LXArtNet/send_art_poll_reply/void/(EthernetUDP)"></a>
@@ -539,6 +672,28 @@ Otherwise, reply is unicast to remoteIP belonging to the sender of the poll
 <code>to_ip</code></dt><dd><p>target address</dd>
 </dl>
 </div>
+<hr class="betweenAPIEntries"><!-- headerDoc=instm;  uid=//apple_ref/cpp/instm/LXArtNet/setNetAddress/void/(uint8_t);   name=LXArtNet::setNetAddress -->
+<a name="//apple_ref/cpp/instm/LXArtNet/setNetAddress/void/(uint8_t)"></a>
+<h3><a name="setNetAddress">setNetAddress</a></h3>
+<hr class="afterName"><p><!-- headerDoc=abstract;uid=//apple_ref/cpp/instm/LXArtNet/setNetAddress/void/(uint8_t);name=start --><!-- begin abstract --><p>set net for sending and receiving
+<!-- end abstract --><!-- headerDoc=abstract;uid=//apple_ref/cpp/instm/LXArtNet/setNetAddress/void/(uint8_t);name=end --></p>
+<div class='declaration_indent'>
+<pre><tt>public</tt>
+<br><!-- a logicalPath="//apple_ref/cpp/cl/void //apple_ref/cpp/tdef/void //apple_ref/cpp/tag/void //apple_ref/cpp/struct/void //apple_ref/cpp/intf/void //apple_ref/doc/anysymbol/void" machineGenerated="true" --><span class="type">void</span><!-- /a --> <!-- a logicalPath="//apple_ref/cpp/instm/LXArtNet/setNetAddress //apple_ref/cpp/clm/LXArtNet/setNetAddress //apple_ref/cpp/intfcm/LXArtNet/setNetAddress //apple_ref/cpp/intfm/LXArtNet/setNetAddress //apple_ref/cpp/func/setNetAddress //apple_ref/cpp/ftmplt/LXArtNet/setNetAddress //apple_ref/cpp/defn/setNetAddress //apple_ref/cpp/macro/setNetAddress //apple_ref/doc/anysymbol/setNetAddress" machineGenerated="true" --><span class="function">setNetAddress</span><!-- /a --> (
+    <!-- a logicalPath="//apple_ref/cpp/cl/uint8_t //apple_ref/cpp/tdef/uint8_t //apple_ref/cpp/tag/uint8_t //apple_ref/cpp/struct/uint8_t //apple_ref/cpp/intf/uint8_t //apple_ref/doc/anysymbol/uint8_t" machineGenerated="true" --><span class="type">uint8_t</span><!-- /a --> <span class="param">s</span> ); </pre>
+</div>
+<h5 class="tight"><font face="Lucida Grande,Helvetica,Arial">Parameters</font></h5>
+<div class='param_indent'>
+<dl>
+<dt><!-- headerDoc=functionparam;  uid=//apple_ref/doc/functionparam/LXArtNet/setNetAddress/s;   name=setNetAddress::s -->
+<a name="//apple_ref/doc/functionparam/LXArtNet/setNetAddress/s"></a>
+<code>s</code></dt><dd><p>subnet 0-127 + flag 0x80</dd>
+</dl>
+</div>
+<h5 class="tight"><font face="Lucida Grande,Helvetica,Arial">Discussion</font></h5>
+<!-- begin discussion --><!-- headerDoc=discussion;uid=//apple_ref/cpp/instm/LXArtNet/setNetAddress/void/(uint8_t);name=start --><p>Net portion of Port-Address, Net+Subnet+Universe (15bits, 7+4+4)
+requires bit 7 to be set to change from ArtAddress packet other 6-0 bits are the net setting
+<!-- headerDoc=discussion;uid=//apple_ref/cpp/instm/LXArtNet/setNetAddress/void/(uint8_t);name=end --><!-- end discussion -->
 <hr class="betweenAPIEntries"><!-- headerDoc=instm;  uid=//apple_ref/cpp/instm/LXArtNet/setNumberOfSlots/void/(int);   name=LXArtNet::setNumberOfSlots -->
 <a name="//apple_ref/cpp/instm/LXArtNet/setNumberOfSlots/void/(int)"></a>
 <h3><a name="setNumberOfSlots">setNumberOfSlots</a></h3>
@@ -687,14 +842,39 @@ Otherwise, reply is unicast to remoteIP belonging to the sender of the poll
 <!-- end return value --></p><h5 class="tight"><font face="Lucida Grande,Helvetica,Arial">Discussion</font></h5>
 <!-- begin discussion --><!-- headerDoc=discussion;uid=//apple_ref/cpp/instm/LXArtNet/universe/uint8_t/();name=start --><p>First universe is zero for Art-Net.  High nibble is subnet, low nibble is universe.
 <!-- headerDoc=discussion;uid=//apple_ref/cpp/instm/LXArtNet/universe/uint8_t/();name=end --><!-- end discussion -->
+<hr class="betweenAPIEntries"><!-- headerDoc=instm;  uid=//apple_ref/cpp/instm/LXArtNet/~LXArtNet//();   name=LXArtNet::~LXArtNet -->
+<a name="//apple_ref/cpp/instm/LXArtNet/~LXArtNet//()"></a>
+<h3><a name="~LXArtNet">~LXArtNet</a></h3>
+<hr class="afterName"><p><!-- headerDoc=abstract;uid=//apple_ref/cpp/instm/LXArtNet/~LXArtNet//();name=start --><!-- begin abstract --><p>destructor for LXArtNet (frees packet buffer if allocated with constructor)
+<!-- end abstract --><!-- headerDoc=abstract;uid=//apple_ref/cpp/instm/LXArtNet/~LXArtNet//();name=end --></p>
+<div class='declaration_indent'>
+<pre><tt>public</tt>
+<br>~<!-- a logicalPath="//apple_ref/cpp/instm/LXArtNet/LXArtNet //apple_ref/cpp/clm/LXArtNet/LXArtNet //apple_ref/cpp/intfcm/LXArtNet/LXArtNet //apple_ref/cpp/intfm/LXArtNet/LXArtNet //apple_ref/cpp/func/LXArtNet //apple_ref/cpp/ftmplt/LXArtNet/LXArtNet //apple_ref/cpp/defn/LXArtNet //apple_ref/cpp/macro/LXArtNet //apple_ref/doc/anysymbol/LXArtNet" machineGenerated="true" --><span class="function">LXArtNet</span><!-- /a --> (
+    <span class="param">void</span> ); </pre>
+</div>
 <hr class="betweenSections">
 <a name="HeaderDoc_vars"></a>
 <h2 class="h2tight">Member Data</h2>
 <dl>
+<dt><tt><a href="index.html#//apple_ref/cpp/data/LXArtNet/_owns_buffer" target="_top">_owns_buffer</a></tt></dt>
+<dd><p>indicates the _packet_buffer was allocated by the constructor and is private.
+</dd>
 <dt><tt><a href="index.html#//apple_ref/cpp/data/LXArtNet/_packet_buffer" target="_top">_packet_buffer</a></tt></dt>
 <dd><p>buffer that holds contents of incoming or outgoing packet
 </dd>
+<dt><tt><a href="index.html#//apple_ref/cpp/data/LXArtNet/_reply_buffer" target="_top">_reply_buffer</a></tt></dt>
+<dd><p>array that holds contents of outgoing ArtPollReply packet
+</dd>
 </dl>
+<hr class="betweenAPIEntries"><!-- headerDoc=data;  uid=//apple_ref/cpp/data/LXArtNet/_owns_buffer;   name=LXArtNet::_owns_buffer -->
+<a name="//apple_ref/cpp/data/LXArtNet/_owns_buffer"></a>
+<h3><a name="_owns_buffer">_owns_buffer</a></h3>
+<hr class="afterName"><p><!-- headerDoc=abstract;uid=//apple_ref/cpp/data/LXArtNet/_owns_buffer;name=start --><!-- begin abstract --><p>indicates the _packet_buffer was allocated by the constructor and is private.
+<!-- end abstract --><!-- headerDoc=abstract;uid=//apple_ref/cpp/data/LXArtNet/_owns_buffer;name=end --></p>
+<div class='declaration_indent'>
+<pre><tt>private</tt>
+<br><!-- a logicalPath="//apple_ref/cpp/cl/uint8_t //apple_ref/cpp/tdef/uint8_t //apple_ref/cpp/tag/uint8_t //apple_ref/cpp/struct/uint8_t //apple_ref/cpp/intf/uint8_t //apple_ref/doc/anysymbol/uint8_t" machineGenerated="true" --><span class="type">uint8_t</span><!-- /a --> <!-- a logicalPath="//apple_ref/cpp/econst/_owns_buffer //apple_ref/cpp/data/LXArtNet/_owns_buffer //apple_ref/cpp/data/_owns_buffer //apple_ref/cpp/clconst/LXArtNet/_owns_buffer " machineGenerated="true" --><span class="var">_owns_buffer</span><!-- /a -->; </pre>
+</div>
 <hr class="betweenAPIEntries"><!-- headerDoc=data;  uid=//apple_ref/cpp/data/LXArtNet/_packet_buffer;   name=LXArtNet::_packet_buffer -->
 <a name="//apple_ref/cpp/data/LXArtNet/_packet_buffer"></a>
 <h3><a name="_packet_buffer">_packet_buffer</a></h3>
@@ -702,15 +882,24 @@ Otherwise, reply is unicast to remoteIP belonging to the sender of the poll
 <!-- end abstract --><!-- headerDoc=abstract;uid=//apple_ref/cpp/data/LXArtNet/_packet_buffer;name=end --></p>
 <div class='declaration_indent'>
 <pre><tt>private</tt>
-<br><!-- a logicalPath="//apple_ref/cpp/cl/uint8_t //apple_ref/cpp/tdef/uint8_t //apple_ref/cpp/tag/uint8_t //apple_ref/cpp/struct/uint8_t //apple_ref/cpp/intf/uint8_t //apple_ref/doc/anysymbol/uint8_t" machineGenerated="true" --><span class="type">uint8_t</span><!-- /a --> <!-- a logicalPath="//apple_ref/cpp/cl/_packet_buffer //apple_ref/cpp/tdef/_packet_buffer //apple_ref/cpp/tag/_packet_buffer //apple_ref/cpp/struct/_packet_buffer //apple_ref/cpp/intf/_packet_buffer //apple_ref/doc/anysymbol/_packet_buffer" machineGenerated="true" --><span class="type">_packet_buffer</span><!-- /a -->[<!-- a logicalPath="//apple_ref/cpp/cl/ARTNET_BUFFER_MAX //apple_ref/cpp/tdef/ARTNET_BUFFER_MAX //apple_ref/cpp/tag/ARTNET_BUFFER_MAX //apple_ref/cpp/struct/ARTNET_BUFFER_MAX //apple_ref/cpp/intf/ARTNET_BUFFER_MAX //apple_ref/doc/anysymbol/ARTNET_BUFFER_MAX" machineGenerated="true" --><span class="type">ARTNET_BUFFER_MAX</span><!-- /a -->]; </pre>
+<br><!-- a logicalPath="//apple_ref/cpp/cl/uint8_t //apple_ref/cpp/tdef/uint8_t //apple_ref/cpp/tag/uint8_t //apple_ref/cpp/struct/uint8_t //apple_ref/cpp/intf/uint8_t //apple_ref/doc/anysymbol/uint8_t" machineGenerated="true" --><span class="type">uint8_t</span><!-- /a --><span class="type">*</span> <!-- a logicalPath="//apple_ref/cpp/econst/_packet_buffer //apple_ref/cpp/data/LXArtNet/_packet_buffer //apple_ref/cpp/data/_packet_buffer //apple_ref/cpp/clconst/LXArtNet/_packet_buffer " machineGenerated="true" --><span class="var">_packet_buffer</span><!-- /a -->; </pre>
 </div>
 <h5 class="tight"><font face="Lucida Grande,Helvetica,Arial">Discussion</font></h5>
 <!-- begin discussion --><!-- headerDoc=discussion;uid=//apple_ref/cpp/data/LXArtNet/_packet_buffer;name=start --><p>There is no double buffer for dmx data.
 readArtNetPacket fills the buffer with the payload of the incoming packet.
 Previous dmx data is invalidated.
 <!-- headerDoc=discussion;uid=//apple_ref/cpp/data/LXArtNet/_packet_buffer;name=end --><!-- end discussion -->
+<hr class="betweenAPIEntries"><!-- headerDoc=data;  uid=//apple_ref/cpp/data/LXArtNet/_reply_buffer;   name=LXArtNet::_reply_buffer -->
+<a name="//apple_ref/cpp/data/LXArtNet/_reply_buffer"></a>
+<h3><a name="_reply_buffer">_reply_buffer</a></h3>
+<hr class="afterName"><p><!-- headerDoc=abstract;uid=//apple_ref/cpp/data/LXArtNet/_reply_buffer;name=start --><!-- begin abstract --><p>array that holds contents of outgoing ArtPollReply packet
+<!-- end abstract --><!-- headerDoc=abstract;uid=//apple_ref/cpp/data/LXArtNet/_reply_buffer;name=end --></p>
+<div class='declaration_indent'>
+<pre><tt>private</tt>
+<br><!-- a logicalPath="//apple_ref/cpp/cl/uint8_t //apple_ref/cpp/tdef/uint8_t //apple_ref/cpp/tag/uint8_t //apple_ref/cpp/struct/uint8_t //apple_ref/cpp/intf/uint8_t //apple_ref/doc/anysymbol/uint8_t" machineGenerated="true" --><span class="type">uint8_t</span><!-- /a --> <!-- a logicalPath="//apple_ref/cpp/cl/_reply_buffer //apple_ref/cpp/tdef/_reply_buffer //apple_ref/cpp/tag/_reply_buffer //apple_ref/cpp/struct/_reply_buffer //apple_ref/cpp/intf/_reply_buffer //apple_ref/doc/anysymbol/_reply_buffer" machineGenerated="true" --><span class="type">_reply_buffer</span><!-- /a -->[<!-- a logicalPath="//apple_ref/cpp/cl/ARTNET_REPLY_SIZE //apple_ref/cpp/tdef/ARTNET_REPLY_SIZE //apple_ref/cpp/tag/ARTNET_REPLY_SIZE //apple_ref/cpp/struct/ARTNET_REPLY_SIZE //apple_ref/cpp/intf/ARTNET_REPLY_SIZE //apple_ref/doc/anysymbol/ARTNET_REPLY_SIZE" machineGenerated="true" --><span class="type">ARTNET_REPLY_SIZE</span><!-- /a -->]; </pre>
+</div>
 <p class="gapBeforeFooter">&nbsp;</p><hr class="afterFooter"><div class="hd_copyright_and_timestamp">
-<p class="hd_timestamp">Last Updated: Tuesday, October 13, 2015
+<p class="hd_timestamp">Last Updated: Saturday, January 30, 2016
 </p></div>
 </td></tr></table>
 </body></html>

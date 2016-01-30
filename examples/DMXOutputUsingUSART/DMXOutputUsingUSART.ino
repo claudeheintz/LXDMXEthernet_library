@@ -191,9 +191,9 @@ void setup() {
 *************************************************************************/
 
 void loop() {
-	uint8_t good_dmx = interface->readDMXPacket(eUDP);
+	uint8_t result = interface->readDMXPacket(eUDP);
 
-  if ( good_dmx ) {
+  if ( result == RESULT_DMX_RECEIVED ) {
      for (int i = 1; i <= interface->numberOfSlots(); i++) {
         LXSerialDMX.setSlot(i , interface->getSlot(i));
      }

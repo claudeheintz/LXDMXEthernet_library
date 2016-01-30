@@ -81,7 +81,7 @@ void loop() {
   uint8_t i;
   
   // read a packet and if the packet is dmx, write its data to the pixels
-  if ( interface->readDMXPacket(eUDP) ) {
+  if ( interface->readDMXPacket(eUDP) == RESULT_DMX_RECEIVED ) {
     for (int p=0; p<NUM_LEDS; p++) {
       // for each NeoPixel find the slot number (each takes 3 slots for RGB)
       i = 3*p;

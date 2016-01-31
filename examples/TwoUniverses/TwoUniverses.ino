@@ -22,9 +22,18 @@
 
 #include <Ethernet.h>
 #include <EthernetUDP.h>
+#include <Adafruit_NeoPixel.h>
+#ifdef __AVR__
+  #include <avr/power.h>
+#endif
 #include <LXDMXEthernet.h>
 #include <LXArtNet.h>
 #include <LXSACN.h>
+
+//*********************** defines ***********************
+
+#define PIN 6
+#define NUM_LEDS 14
 
 //  Make choices here about protocol ( set to 1 to activate option )
 
@@ -47,6 +56,9 @@ byte mac[] = { 0x00, 0x08, 0xDC, 0x4C, 0x29, 0x7E }; //00:08:DC Wiznet
 IPAddress ip(169,254,100,100);
 IPAddress gateway(169,254,1,1);
 IPAddress subnet_mask(255,255,0,0);
+
+// Adafruit_NeoPixel instance to drive the NeoPixels
+Adafruit_NeoPixel ring = Adafruit_NeoPixel(NUM_LEDS, PIN, NEO_GRB + NEO_KHZ800);
 
 // An EthernetUDP instance to let us send and receive packets over UDP
 EthernetUDP eUDP;
@@ -85,8 +97,11 @@ void setup() {
   if ( ! USE_DHCP ) {
      ((LXArtNet*)interface)->send_art_poll_reply(eUDP);
   }
-	pinMode(9, OUTPUT);
-	pinMode(10, OUTPUT);
+	pinMode(3, OUTPUT);
+	pinMode(5, OUTPUT);
+	
+	ring.begin();                   // Initialize NeoPixel driver
+  ring.show();
 }
 
 /************************************************************************
@@ -106,12 +121,16 @@ void loop() {
 
 	  if ( read_result == RESULT_DMX_RECEIVED ) {
 	     // edge case test universe 1, slot 1
-	     analogWrite(9,interface->getSlot(1));
+	     analogWrite(3,interface->getSlot(1));
+       ring.setPixelColor(1, interface->getSlot(1), interface->getSlot(2), interface->getSlot(3));
+	     ring.show();
 	  } else if ( read_result == RESULT_NONE ) {				// if not good dmx first universe (or art poll), try 2nd
 	     read_result2 = interfaceUniverse2->readDMXPacketContents(eUDP, packetSize);
 	     if ( read_result2 == RESULT_DMX_RECEIVED ) {
 	     		// edge case test 2nd universe, slot 512
-		  		analogWrite(10,interfaceUniverse2->getSlot(512));
+		  		analogWrite(5,interfaceUniverse2->getSlot(512));
+          ring.setPixelColor(8, interface->getSlot(510), interface->getSlot(511), interface->getSlot(512));
+	        ring.show();
 	     }
 	  }
 	}

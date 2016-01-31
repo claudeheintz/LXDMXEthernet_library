@@ -207,7 +207,7 @@ class LXArtNet : public LXDMXEthernet {
 /*!
 * @brief array that holds contents of outgoing ArtPollReply packet
 */	
-	uint8_t _reply_buffer[ARTNET_REPLY_SIZE];
+	static uint8_t _reply_buffer[ARTNET_REPLY_SIZE];
 	
 /// number of slots/address/channels
   	int       _dmx_slots;

@@ -19,6 +19,9 @@
 
 #include "LXArtNet.h"
 
+//static buffer for sending poll replies
+uint8_t LXArtNet::_reply_buffer[ARTNET_REPLY_SIZE];
+
 LXArtNet::LXArtNet ( IPAddress address )
 {
 	initialize(0);

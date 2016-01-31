@@ -85,7 +85,8 @@ void setup() {
   if ( ! USE_DHCP ) {
      ((LXArtNet*)interface)->send_art_poll_reply(eUDP);
   }
-
+	pinMode(9, OUTPUT);
+	pinMode(10, OUTPUT);
 }
 
 /************************************************************************
@@ -105,12 +106,12 @@ void loop() {
 
 	  if ( read_result == RESULT_DMX_RECEIVED ) {
 	     // edge case test universe 1, slot 1
-	     analogWrite(12,2*interface->getSlot(1));
+	     analogWrite(9,interface->getSlot(1));
 	  } else if ( read_result == RESULT_NONE ) {				// if not good dmx first universe (or art poll), try 2nd
 	     read_result2 = interfaceUniverse2->readDMXPacketContents(eUDP, packetSize);
 	     if ( read_result2 == RESULT_DMX_RECEIVED ) {
 	     		// edge case test 2nd universe, slot 512
-		  		analogWrite(14,2*interfaceUniverse2->getSlot(512));
+		  		analogWrite(10,interfaceUniverse2->getSlot(512));
 	     }
 	  }
 	}

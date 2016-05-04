@@ -1,5 +1,5 @@
 /*
- DMXOutputUsingUSART.ino
+ DMXOutputSAMD21
 
  This sketch demonstrates converting Art-Net or sACN packets recieved using an
  Arduino Ethernet Shield to DMX output using serial output to a driver chip.
@@ -8,39 +8,35 @@
  that can send Art-Net or sACN packets to the Arduino.
 
   The sketch receives incoming UDP packets.  If a received packet is
-  Art-Net/sACN DMX output, it uses the AVR microcontroller's USART to output
-  the dmx levels as serial data.  A driver chip is used
+  Art-Net/sACN DMX output, it uses one of the the SAMD-21's SERCOM (serial communication)
+  peripherals to output the dmx levels as serial data.  A driver chip is used
   to convert this output to a differential signal (actual DMX).
 
   This is the circuit for a simple unisolated DMX Shield:
 
- Arduino                    SN 75176 A or MAX 481CPA
+ Arduino                  SN 75176 A or MAX 481CPA
  pin                      _______________
  |                        | 1      Vcc 8 |------ +5v
  V                        |              |                 DMX Output
    |                 +----| 2        B 7 |---------------- Pin 2
    |                 |    |              |
-2  |----------------------| 3 DE     A 6 |---------------- Pin 3
+3  |----------------------| 3 DE     A 6 |---------------- Pin 3
    |                      |              |
-TX |----------------------| 4 DI   Gnd 5 |---+------------ Pin 1
+4  |----------------------| 4 DI   Gnd 5 |---+------------ Pin 1
    |                                         |
    |                                        GND
- 5 |--------[ 330 ohm ]---[ LED ]------------|
 
-
-
- Created January 7th, 2014 by Claude Heintz
- Current version 1.5
- (see bottom of file for revision history)
-
- See LXArduinoDMXUSART.h or http://lx.claudeheintzdesign.com/opensource.html for license.
+ Created May 4th, 2014 by Claude Heintz
+ Current version 1.0 (see bottom of file for revision history)
+ 
+ See LXSAMD21DMX.h or http://lx.claudeheintzdesign.com/opensource.html for license.
  Art-Net(tm) Designed by and Copyright Artistic Licence (UK) Ltd.
 
  */
 
 //*********************** includes ***********************
 
-#include "LXArduinoDMXUSART.h"
+#include "LXSAMD21DMX.h"
 
 #include <SPI.h>
 // *** note if using  Arduino Ethernet Shield v2
@@ -171,8 +167,8 @@ void setup() {
     eUDP.begin(interface->dmxPort());
   }
 
-  LXSerialDMX.setDirectionPin(RXTX_PIN);
-  LXSerialDMX.startOutput();
+  SAMD21DMX.setDirectionPin(RXTX_PIN);
+  SAMD21DMX.startOutput();
   
   if ( ! USE_SACN ) {
   	((LXArtNet*)interface)->send_art_poll_reply(eUDP);
@@ -195,7 +191,7 @@ void loop() {
 
   if ( result == RESULT_DMX_RECEIVED ) {
      for (int i = 1; i <= interface->numberOfSlots(); i++) {
-        LXSerialDMX.setSlot(i , interface->getSlot(i));
+        SAMD21DMX.setSlot(i , interface->getSlot(i));
      }
      blinkLED();
   }
@@ -203,10 +199,5 @@ void loop() {
 
 /*
     Revision History
-    v1.0 initial release January 2014
-    v1.1 added monitor LED to code and circuit
-    v1.2 8/14/15 changed library support and clarified code
-    v1.3 moved control of options to "includes" and "defines"
-    v1.4 uses LXArtNet class which encapsulates Art-Net functionality
-    v1.5 revised as example file for library
+    v1.0 modified AVR example for SAM
 */

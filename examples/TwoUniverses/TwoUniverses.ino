@@ -20,8 +20,18 @@
 */
 /**************************************************************************/
 
+#include <SPI.h>
+
+// #### Important to use with Ethernet Shield v2, uncomment the next line ####
+//#define ETHERNET_SHIELD_V2
+#if defined ( ETHERNET_SHIELD_V2 )
+#include <Ethernet2.h>
+#include <EthernetUdp2.h>
+#else
 #include <Ethernet.h>
-#include <EthernetUDP.h>
+#include <EthernetUdp.h>
+#endif
+
 #include <Adafruit_NeoPixel.h>
 #ifdef __AVR__
   #include <avr/power.h>
@@ -95,7 +105,7 @@ void setup() {
 
   //announce presence via Art-Net Poll Reply (only advertises one universe)
   if ( ! USE_DHCP ) {
-     ((LXArtNet*)interface)->send_art_poll_reply(eUDP);
+     ((LXArtNet*)interface)->send_art_poll_reply(&eUDP);
   }
 	pinMode(3, OUTPUT);
 	pinMode(5, OUTPUT);
@@ -116,7 +126,7 @@ void loop() {
   uint16_t packetSize = eUDP.parsePacket();
   if ( packetSize ) {
   	  packetSize = eUDP.read(packetBuffer, SACN_BUFFER_MAX);
-	  uint8_t read_result = interface->readDMXPacketContents(eUDP, packetSize);
+	  uint8_t read_result = interface->readDMXPacketContents(&eUDP, packetSize);
 	  uint8_t read_result2 = 0;
 
 	  if ( read_result == RESULT_DMX_RECEIVED ) {
@@ -125,7 +135,7 @@ void loop() {
        ring.setPixelColor(1, interface->getSlot(1), interface->getSlot(2), interface->getSlot(3));
 	     ring.show();
 	  } else if ( read_result == RESULT_NONE ) {				// if not good dmx first universe (or art poll), try 2nd
-	     read_result2 = interfaceUniverse2->readDMXPacketContents(eUDP, packetSize);
+	     read_result2 = interfaceUniverse2->readDMXPacketContents(&eUDP, packetSize);
 	     if ( read_result2 == RESULT_DMX_RECEIVED ) {
 	     		// edge case test 2nd universe, slot 512
 		  		analogWrite(5,interfaceUniverse2->getSlot(512));

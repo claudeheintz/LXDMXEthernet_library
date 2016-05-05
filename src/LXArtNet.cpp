@@ -141,7 +141,7 @@ uint8_t* LXArtNet::replyData( void ) {
 	return &_reply_buffer[0];
 }
 
-uint8_t LXArtNet::readDMXPacket ( EthernetUDP eUDP ) {
+uint8_t LXArtNet::readDMXPacket ( UDP* eUDP ) {
    uint16_t opcode = readArtNetPacket(eUDP);
    if ( opcode == ARTNET_ART_DMX ) {
    	return RESULT_DMX_RECEIVED;
@@ -149,7 +149,7 @@ uint8_t LXArtNet::readDMXPacket ( EthernetUDP eUDP ) {
    return RESULT_NONE;
 }
 
-uint8_t LXArtNet::readDMXPacketContents ( EthernetUDP eUDP, uint16_t packetSize ) {
+uint8_t LXArtNet::readDMXPacketContents ( UDP* eUDP, uint16_t packetSize ) {
 	uint16_t opcode = readArtNetPacketContents(eUDP, packetSize);
    if ( opcode == ARTNET_ART_DMX ) {
    	return RESULT_DMX_RECEIVED;
@@ -161,24 +161,24 @@ uint8_t LXArtNet::readDMXPacketContents ( EthernetUDP eUDP, uint16_t packetSize 
 }
 
 /*
-  attempts to read a packet from the supplied EthernetUDP object
+  attempts to read a packet from the supplied UDP object
   returns opcode
   sends ArtPollReply with IPAddress if packet is ArtPoll
   replies directly to sender unless reply_ip != INADDR_NONE allowing specification of broadcast
   only returns ARTNET_ART_DMX if packet contained dmx data for this universe
   Packet size checks that packet is >= expected size to allow zero termination or padding
 */
-uint16_t LXArtNet::readArtNetPacket ( EthernetUDP eUDP ) {
+uint16_t LXArtNet::readArtNetPacket ( UDP* eUDP ) {
 	uint16_t opcode = ARTNET_NOP;
-	uint16_t packetSize = eUDP.parsePacket();
+	uint16_t packetSize = eUDP->parsePacket();
 	if ( packetSize ) {
-		packetSize = eUDP.read(_packet_buffer, ARTNET_BUFFER_MAX);
+		packetSize = eUDP->read(_packet_buffer, ARTNET_BUFFER_MAX);
 		opcode = readArtNetPacketContents(eUDP, packetSize);
 	}
 	return opcode;
 }
 
-uint16_t LXArtNet::readArtNetPacketContents ( EthernetUDP eUDP, uint16_t packetSize ) {
+uint16_t LXArtNet::readArtNetPacketContents ( UDP* eUDP, uint16_t packetSize ) {
    uint16_t opcode = ARTNET_NOP;
 	
 	_dmx_slots = 0;
@@ -196,9 +196,9 @@ uint16_t LXArtNet::readArtNetPacketContents ( EthernetUDP eUDP, uint16_t packetS
 				slots += _packet_buffer[16] << 8;
 				if ( packetSize >= slots ) {
 					if ( (uint32_t)_dmx_sender == 0 ) {		//if first sender, remember address
-						_dmx_sender = eUDP.remoteIP();
+						_dmx_sender = eUDP->remoteIP();
 					}
-					if ( _dmx_sender == eUDP.remoteIP() ) {
+					if ( _dmx_sender == eUDP->remoteIP() ) {
 						_dmx_slots = slots;
 					}	// matched sender
 				}		// matched size
@@ -222,7 +222,7 @@ uint16_t LXArtNet::readArtNetPacketContents ( EthernetUDP eUDP, uint16_t packetS
    return opcode;
 }
 
-void LXArtNet::sendDMX ( EthernetUDP eUDP, IPAddress to_ip ) {
+void LXArtNet::sendDMX ( UDP* eUDP, IPAddress to_ip ) {
    _packet_buffer[0] = 'A';
    _packet_buffer[1] = 'r';
    _packet_buffer[2] = 't';
@@ -248,26 +248,26 @@ void LXArtNet::sendDMX ( EthernetUDP eUDP, IPAddress to_ip ) {
    _packet_buffer[17] = _dmx_slots & 0xFF;
    //assume dmx data has been set
   
-   eUDP.beginPacket(to_ip, ARTNET_PORT);
-   eUDP.write(_packet_buffer, 18+_dmx_slots);
-   eUDP.endPacket();
+   eUDP->beginPacket(to_ip, ARTNET_PORT);
+   eUDP->write(_packet_buffer, 18+_dmx_slots);
+   eUDP->endPacket();
 }
 
 /*
-  sends ArtDMX packet to EthernetUDP object's remoteIP if to_ip is not specified
+  sends ArtDMX packet to UDP object's remoteIP if to_ip is not specified
   ( remoteIP is set when parsePacket() is called )
   includes my_ip as address of this node
 */
-void LXArtNet::send_art_poll_reply( EthernetUDP eUDP ) {
+void LXArtNet::send_art_poll_reply( UDP* eUDP ) {
 	_reply_buffer[190] = _universe;
   
   IPAddress a = _broadcast_address;
   if ( a == INADDR_NONE ) {
-    a = eUDP.remoteIP();   // reply directly if no broadcast address is supplied
+    a = eUDP->remoteIP();   // reply directly if no broadcast address is supplied
   }
-  eUDP.beginPacket(a, ARTNET_PORT);
-  eUDP.write(_reply_buffer, ARTNET_REPLY_SIZE);
-  eUDP.endPacket();
+  eUDP->beginPacket(a, ARTNET_PORT);
+  eUDP->write(_reply_buffer, ARTNET_REPLY_SIZE);
+  eUDP->endPacket();
 }
 
 uint16_t LXArtNet::parse_header( void ) {

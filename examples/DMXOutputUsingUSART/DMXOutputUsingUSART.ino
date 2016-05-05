@@ -43,12 +43,18 @@ TX |----------------------| 4 DI   Gnd 5 |---+------------ Pin 1
 #include "LXArduinoDMXUSART.h"
 
 #include <SPI.h>
-// *** note if using  Arduino Ethernet Shield v2
-//     this next 2 lines should read:
-//     #include <Ethernet2.h>
-//     #include <EthernetUDP2.h>
+
+// #### Important to use with Ethernet Shield v2, uncomment the next line ####
+//#define ETHERNET_SHIELD_V2
+#if defined ( ETHERNET_SHIELD_V2 )
+#include <Ethernet2.h>
+#include <EthernetUdp2.h>
+#else
 #include <Ethernet.h>
-#include <EthernetUDP.h>
+#include <EthernetUdp.h>
+#endif
+
+
 #include <LXDMXEthernet.h>
 #include <LXArtNet.h>
 #include <LXSACN.h>
@@ -175,7 +181,7 @@ void setup() {
   LXSerialDMX.startOutput();
   
   if ( ! USE_SACN ) {
-  	((LXArtNet*)interface)->send_art_poll_reply(eUDP);
+  	((LXArtNet*)interface)->send_art_poll_reply(&eUDP);
   }
   blinkLED();
 }
@@ -191,7 +197,7 @@ void setup() {
 *************************************************************************/
 
 void loop() {
-	uint8_t result = interface->readDMXPacket(eUDP);
+	uint8_t result = interface->readDMXPacket(&eUDP);
 
   if ( result == RESULT_DMX_RECEIVED ) {
      for (int i = 1; i <= interface->numberOfSlots(); i++) {

@@ -11,7 +11,6 @@
 #define LXSACNDMX_H
 
 #include <Arduino.h>
-#include <EthernetUdp.h>
 #include <inttypes.h>
 #include "LXDMXEthernet.h"
 
@@ -107,32 +106,32 @@ class LXSACN : public LXDMXEthernet {
 
  /*!
  * @brief read UDP packet
- * @param eUDP EthernetUDP object to be used for getting UDP packet
+ * @param eUDP UDP* object to be used for getting UDP packet
  * @return 1 if packet contains dmx
  */    
-   uint8_t  readDMXPacket  ( EthernetUDP eUDP );
+   uint8_t  readDMXPacket  ( UDP* eUDP );
    
  /*!
  * @brief read contents of packet from _packet_buffer
  * @discussion _packet_buffer should already contain packet payload when this is called
- * @param eUDP EthernetUDP
+ * @param eUDP UDP*
  * @param packetSize size of received packet
  * @return 1 if packet contains dmx
  */      
-   virtual uint8_t readDMXPacketContents (EthernetUDP eUDP, uint16_t packetSize );
+   virtual uint8_t readDMXPacketContents (UDP* eUDP, uint16_t packetSize );
    
  /*!
  * @brief process packet, reading it into _packet_buffer
- * @param eUDP EthernetUDP
+ * @param eUDP UDP*
  * @return number of dmx slots read or 0 if not dmx/invalid
  */
-   uint16_t readSACNPacket ( EthernetUDP eUDP );
+   uint16_t readSACNPacket ( UDP* eUDP );
  /*!
  * @brief send sACN E1.31 packet for dmx output from network
- * @param eUDP EthernetUDP object to be used for sending UDP packet
+ * @param eUDP UDP* object to be used for sending UDP packet
  * @param to_ip target address
  */  
-   void     sendDMX        ( EthernetUDP eUDP, IPAddress to_ip );
+   void     sendDMX        ( UDP* eUDP, IPAddress to_ip );
 
    
   private:

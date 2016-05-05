@@ -27,11 +27,12 @@ OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
 OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 */
 
+#include <UDP.h>
+
 #ifndef LXDMXETHERNET_H
 #define LXDMXETHERNET_H
 
 #include <Arduino.h>
-#include <EthernetUdp.h>
 #include <inttypes.h>
 
 #define RESULT_NONE 0
@@ -49,7 +50,7 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
           Ethernet library used with the original Arduino Ethernet Shield
           For the Ethernet v2 shield, use LXDMXEthernet2_library along with Ethernet2 Library
           
-          For multicast, EthernetUDP.h and EthernetUD2.cpp in the Ethernet library
+          For multicast, EthernetUdp.h and EthernetUdp2.cpp in the Ethernet library
           must be modified to add the beginMulticast method.
           See the code at the bottom of LXDMXEthernet.h
 */
@@ -109,21 +110,21 @@ class LXDMXEthernet {
  * @brief read UDP packet
  * @return 1 if packet contains dmx
  */   
-   virtual uint8_t readDMXPacket ( EthernetUDP eUDP );
+   virtual uint8_t readDMXPacket ( UDP* eUDP );
    
  /*!
  * @brief read contents of packet from _packet_buffer
  * @discussion _packet_buffer should already contain packet payload when this is called
- * @param eUDP EthernetUDP
+ * @param eUDP pointer to UDP object
  * @param packetSize size of received packet
  * @return 1 if packet contains dmx
  */      
-   virtual uint8_t readDMXPacketContents (EthernetUDP eUDP, uint16_t packetSize );
+   virtual uint8_t readDMXPacketContents (UDP* eUDP, uint16_t packetSize );
    
 /*!
  * @brief send the contents of the _packet_buffer to the address to_ip
  */
-   virtual void    sendDMX       ( EthernetUDP eUDP, IPAddress to_ip );
+   virtual void    sendDMX       ( UDP* eUDP, IPAddress to_ip );
 };
 
 #endif // ifndef LXDMXETHERNET_H
@@ -142,16 +143,16 @@ see  https://github.com/aallan/Arduino/blob/3811729f82ef05f3ae43341022e7b65a92d3
 2) Duplicate the Ethernet library in your sketchbook folder (~/Documents/Arduino/libraries)
    Add the required method as follows:
 
-3)  In EthernetUDPh add the beginMulticast method declaration:
+3)  In EthernetUdph add the beginMulticast method declaration:
 ...
-  EthernetUDP();  // Constructor
+  EthernetUdp();  // Constructor
   virtual uint8_t begin(uint16_t);	// initialize, start listening on specified port. Returns 1 if successful, 0 if there are no sockets available to use
   uint8_t beginMulticast(IPAddress ip, uint16_t port);  //############## added to standard library
 ...
 
-4)  In EthernetUDP.cpp add the method body:
+4)  In EthernetUdp.cpp add the method body:
 
-uint8_t EthernetUDP::beginMulticast(IPAddress ip, uint16_t port) {
+uint8_t EthernetUdp::beginMulticast(IPAddress ip, uint16_t port) {
     if (_sock != MAX_SOCK_NUM)
         return 0;
     

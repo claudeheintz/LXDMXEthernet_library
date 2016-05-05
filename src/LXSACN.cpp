@@ -88,14 +88,14 @@ uint8_t* LXSACN::dmxData( void ) {
 	return &_packet_buffer[SACN_ADDRESS_OFFSET];
 }
 
-uint8_t LXSACN::readDMXPacket ( EthernetUDP eUDP ) {
+uint8_t LXSACN::readDMXPacket ( UDP* eUDP ) {
    if ( readSACNPacket(eUDP) > 0 ) {
    	return ( startCode() == 0 );
    }	
    return 0;
 }
 
-uint8_t LXSACN::readDMXPacketContents ( EthernetUDP eUDP, uint16_t packetSize ) {
+uint8_t LXSACN::readDMXPacketContents ( UDP* eUDP, uint16_t packetSize ) {
 	if ( parse_root_layer(packetSize) > 0 ) {
    	if ( startCode() == 0 ) {
    		return RESULT_DMX_RECEIVED;
@@ -104,17 +104,17 @@ uint8_t LXSACN::readDMXPacketContents ( EthernetUDP eUDP, uint16_t packetSize ) 
    return RESULT_NONE;
 }
 
-uint16_t LXSACN::readSACNPacket ( EthernetUDP eUDP ) {
+uint16_t LXSACN::readSACNPacket ( UDP* eUDP ) {
    _dmx_slots = 0;
-   uint16_t packetSize = eUDP.parsePacket();
+   uint16_t packetSize = eUDP->parsePacket();
    if ( packetSize ) {
-      packetSize = eUDP.read(_packet_buffer, SACN_BUFFER_MAX);
+      packetSize = eUDP->read(_packet_buffer, SACN_BUFFER_MAX);
       _dmx_slots = parse_root_layer(packetSize);
    }
    return _dmx_slots;
 }
 
-void LXSACN::sendDMX ( EthernetUDP eUDP, IPAddress to_ip ) {
+void LXSACN::sendDMX ( UDP* eUDP, IPAddress to_ip ) {
    for (int n=0; n<126; n++) {
     	_packet_buffer[n] = 0;		// zero outside layers & start code
     }
@@ -163,9 +163,9 @@ void LXSACN::sendDMX ( EthernetUDP eUDP, IPAddress to_ip ) {
    _packet_buffer[123] = fplusl >> 8;
    _packet_buffer[124] = fplusl & 0xFF;
    //assume dmx data has been set
-   eUDP.beginPacket(to_ip, SACN_PORT);
-   eUDP.write(_packet_buffer, _dmx_slots + 126);
-   eUDP.endPacket();
+   eUDP->beginPacket(to_ip, SACN_PORT);
+   eUDP->write(_packet_buffer, _dmx_slots + 126);
+   eUDP->endPacket();
 }
 
 uint16_t LXSACN::parse_root_layer( uint16_t size ) {

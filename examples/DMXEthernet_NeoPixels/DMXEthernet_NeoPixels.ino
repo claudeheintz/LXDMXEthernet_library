@@ -1,6 +1,15 @@
 #include <SPI.h>
+
+// #### Important to use with Ethernet Shield v2, uncomment the next line ####
+//#define ETHERNET_SHIELD_V2
+#if defined ( ETHERNET_SHIELD_V2 )
+#include <Ethernet2.h>
+#include <EthernetUdp2.h>
+#else
 #include <Ethernet.h>
-#include <EthernetUDP.h>
+#include <EthernetUdp.h>
+#endif
+
 #include <Adafruit_NeoPixel.h>
 #ifdef __AVR__
   #include <avr/power.h>
@@ -81,7 +90,7 @@ void loop() {
   uint8_t i;
   
   // read a packet and if the packet is dmx, write its data to the pixels
-  if ( interface->readDMXPacket(eUDP) == RESULT_DMX_RECEIVED ) {
+  if ( interface->readDMXPacket(&eUDP) == RESULT_DMX_RECEIVED ) {
     for (int p=0; p<NUM_LEDS; p++) {
       // for each NeoPixel find the slot number (each takes 3 slots for RGB)
       i = 3*p;

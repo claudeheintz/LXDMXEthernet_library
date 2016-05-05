@@ -9,7 +9,6 @@
 #define LXARTNET_H
 
 #include <Arduino.h>
-#include <EthernetUdp.h>
 #include <inttypes.h>
 #include "LXDMXEthernet.h"
 
@@ -151,10 +150,10 @@ class LXArtNet : public LXDMXEthernet {
 
  /*!
  * @brief read UDP packet
- * @param eUDP EthernetUDP object to be used for getting UDP packet
+ * @param eUDP pointer to UDP object to be used for getting UDP packet
  * @return 1 if packet contains dmx
  */    
-   uint8_t  readDMXPacket       ( EthernetUDP eUDP );
+   uint8_t  readDMXPacket       ( UDP* eUDP );
  /*!
  * @brief read contents of packet from _packet_buffer
  * @discussion _packet_buffer should already contain packet payload when this is called
@@ -162,33 +161,33 @@ class LXArtNet : public LXDMXEthernet {
  * @param packetSize size of received packet
  * @return 1 if packet contains dmx
  */      
-   uint8_t readDMXPacketContents ( EthernetUDP eUDP, uint16_t packetSize );
+   uint8_t readDMXPacketContents ( UDP* eUDP, uint16_t packetSize );
  /*!
  * @brief process packet, reading it into _packet_buffer
- * @param eUDP EthernetUDP (used for Poll Reply if applicable)
+ * @param eUDP UDP* (used for Poll Reply if applicable)
  * @return Art-Net opcode of packet
  */
-   uint16_t readArtNetPacket    ( EthernetUDP eUDP );
+   uint16_t readArtNetPacket    ( UDP* eUDP );
  /*!
  * @brief read contents of packet from _packet_buffer
  * @param wUDP WiFiUDP (used for Poll Reply if applicable)
  * @param packetSize size of received packet
  * @return Art-Net opcode of packet
  */   
-   uint16_t readArtNetPacketContents ( EthernetUDP eUDP, uint16_t packetSize );
+   uint16_t readArtNetPacketContents ( UDP* eUDP, uint16_t packetSize );
  /*!
  * @brief send Art-Net ArtDMX packet for dmx output from network
- * @param eUDP EthernetUDP object to be used for sending UDP packet
+ * @param eUDP UDP* to be used for sending UDP packet
  * @param to_ip target address
  */    
-   void     sendDMX             ( EthernetUDP eUDP, IPAddress to_ip );
+   void     sendDMX             ( UDP* eUDP, IPAddress to_ip );
  /*!
  * @brief send ArtPoll Reply packet for dmx output from network
  * @discussion If broadcast address is defined by passing subnet to constructor, reply is broadcast
  *             Otherwise, reply is unicast to remoteIP belonging to the sender of the poll
- * @param eUDP EthernetUDP object to be used for sending UDP packet
+ * @param eUDP pointer to UDP object to be used for sending UDP packet
  */  
-   void     send_art_poll_reply ( EthernetUDP eUDP );
+   void     send_art_poll_reply ( UDP* eUDP );
    
   private:
 /*!

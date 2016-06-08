@@ -200,6 +200,10 @@ uint16_t LXArtNet::readArtNetPacketContents ( UDP* eUDP, uint16_t packetSize ) {
 					}
 					if ( _dmx_sender == eUDP->remoteIP() ) {
 						_dmx_slots = slots;
+						//zero remainder of buffer
+					  for (int n=packetSize; n<ARTNET_BUFFER_MAX; n++) {
+						 _packet_buffer[n] = 0;
+					  }
 					}	// matched sender
 				}		// matched size
 			}			// matched universe

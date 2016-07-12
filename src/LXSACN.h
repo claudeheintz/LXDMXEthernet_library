@@ -63,6 +63,17 @@ class LXSACN : public LXDMXEthernet {
 * @param u universe 1-255
 */
    void    setUniverse   ( uint8_t u );
+/*!
+ * @brief enables double buffering of received DMX data, merging from two sources
+ * @discussion enableHTP allocates three 512 byte data buffers A, B, and Merged.
+                         when sACN DMX is received, the data is copied into A or b
+                         based on the IP address of the sender.  The highest level
+                         for each slot is written to the merged HTP buffer.
+                         Read the data from the HTP buffer using getHTPSlot(n).
+                         enableHTP() is not available on an ATmega168, ATmega328, or
+                         ATmega328P due to RAM size.
+ */
+   void    enableHTP();
 
  /*
  * @brief number of slots (aka addresses or channels)
@@ -82,6 +93,13 @@ class LXSACN : public LXDMXEthernet {
  * @return level for slot (0-255)
  */  
    uint8_t  getSlot      ( int slot );
+ /*!
+ * @brief get level data from slot/address/channel when merge/double buffering is enabled
+ * @discussion You must call enableHTP() once after the constructor before using getHTPSlot()
+ * @param slot 1 to 512
+ * @return level for slot (0-255)
+ */  
+   uint8_t  getHTPSlot      ( int slot );
  /*!
  * @brief set level data (0-255) for slot/address/channel
  * @param slot 1 to 512
@@ -118,7 +136,7 @@ class LXSACN : public LXDMXEthernet {
  * @param packetSize size of received packet
  * @return 1 if packet contains dmx
  */      
-   virtual uint8_t readDMXPacketContents (UDP* eUDP, uint16_t packetSize );
+   virtual uint8_t readDMXPacketContents (UDP* eUDP, int packetSize );
    
  /*!
  * @brief process packet, reading it into _packet_buffer
@@ -152,19 +170,53 @@ class LXSACN : public LXDMXEthernet {
   	uint16_t  _universe;
 /// sequence number for sending sACN DMX packets
   	uint8_t   _sequence;
-/// cid of first sender of an E 1.31 DMX packet (subsequent senders ignored)
+/// cid of first sender of an E 1.31 DMX packet (subsequent senders ignored unless using htp)
   	uint8_t _dmx_sender_id[16];
+  	
+/*!
+* @brief indicates dmx data is double buffered
+* @discussion  In order to support HTPmerge, 3 buffers to hold DMX data must be allocated
+               this is done by calling enableHTP()
+*/
+	uint8_t   _using_htp;
+
+/// buffer that holds dmx data received from first source
+  	uint8_t*  _dmx_buffer_a;
+/// buffer that holds dmx data received from other source
+  	uint8_t*  _dmx_buffer_b;
+/// composite HTP buffer
+  	uint8_t*  _dmx_buffer_c;
+/// number of slots/address/channels
+  	uint16_t  _dmx_slots_a;
+/// number of slots/address/channels
+  	uint16_t  _dmx_slots_b;
+/// cid of second sender of an E 1.31 DMX packet
+  	uint8_t _dmx_sender_id_b[16];
 
 /*!
 * @brief checks the buffer for the sACN header and root layer size
 */  	
-  	uint16_t  parse_root_layer    ( uint16_t size );
+  	uint16_t  parse_root_layer    ( int size );
 /*!
 * @brief checks the buffer for the sACN header and root layer size
 */  
   	uint16_t  parse_framing_layer ( uint16_t size );	
+/*!
+* @brief dmp layer is where DMX data is located
+*/  
   	uint16_t  parse_dmp_layer     ( uint16_t size );
+/*!
+* @brief utility for checking integrity of ACN packet
+*/
   	uint8_t   checkFlagsAndLength ( uint8_t* flb, uint16_t size );
+/*!
+* @brief utility for matching CID contained in packet
+*/
+  	uint8_t   checkCID            ( uint8_t* cid );
+/*!
+* @brief copies CID from packet to array (if empty)
+*/
+  	void      copyCIDifEmpty      ( uint8_t* cid );
   	
 /*!
 * @brief initialize data structures

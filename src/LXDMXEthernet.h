@@ -39,6 +39,8 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #define RESULT_DMX_RECEIVED 1
 #define RESULT_PACKET_COMPLETE 2
 
+#define DMX_UNIVERSE_SIZE 512
+
 /*!   
 @class LXDMXEthernet
 @abstract
@@ -75,6 +77,17 @@ class LXDMXEthernet {
 * @param u universe 0/1-255
 */
    virtual void    setUniverse   ( uint8_t u );
+/*!
+ * @brief enables double buffering of received DMX data, merging from two sources
+ * @discussion enableHTP allocates three 512 byte data buffers A, B, and Merged.
+                         when a DMX packet is received, the data is copied into A or b
+                         based on the IP address of the sender.  The highest level
+                         for each slot is written to the merged HTP buffer.
+                         Read the data from the HTP buffer using getHTPSlot(n).
+                         enableHTP() is not available on an ATmega168, ATmega328, or
+                         ATmega328P due to RAM size.
+ */
+   virtual void    enableHTP     ( void );
  
  /*!
  * @brief number of slots (aka addresses or channels)
@@ -94,6 +107,13 @@ class LXDMXEthernet {
  * @return level for slot (0-255)
  */  
    virtual uint8_t  getSlot      ( int slot );
+ /*!
+ * @brief get level data from slot/address/channel when merge/double buffering is enabled
+ * @discussion You must call enableHTP() once after the constructor before using getHTPSlot()
+ * @param slot 1 to 512
+ * @return level for slot (0-255)
+ */  
+   virtual uint8_t  getHTPSlot   ( int slot );
  /*!
  * @brief set level data (0-255) for slot/address/channel
  * @param slot 1 to 512
@@ -119,7 +139,7 @@ class LXDMXEthernet {
  * @param packetSize size of received packet
  * @return 1 if packet contains dmx
  */      
-   virtual uint8_t readDMXPacketContents (UDP* eUDP, uint16_t packetSize );
+   virtual uint8_t readDMXPacketContents (UDP* eUDP, int packetSize );
    
 /*!
  * @brief send the contents of the _packet_buffer to the address to_ip

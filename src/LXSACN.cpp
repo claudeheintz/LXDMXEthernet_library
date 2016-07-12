@@ -26,6 +26,11 @@ LXSACN::~LXSACN ( void )
 	if ( _owns_buffer ) {		// if we created this buffer, then free the memory
 		free(_packet_buffer);
 	}
+	if ( _using_htp ) {
+		free(_dmx_buffer_a);
+		free(_dmx_buffer_b);
+		free(_dmx_buffer_c);
+	}
 }
 
 void  LXSACN::initialize  ( uint8_t* b ) {
@@ -34,20 +39,24 @@ void  LXSACN::initialize  ( uint8_t* b ) {
 		_packet_buffer = (uint8_t*) malloc(SACN_BUFFER_MAX);
 		_owns_buffer = 1;
 	} else {
-		// external buffer
+		// external buffer.  Size MUST be >=SACN_BUFFER_MAX
 		_packet_buffer = b;
 		_owns_buffer = 0;
 	}
 	
-	//zero buffer including _dmx_data[0] which is start code
-    for (int n=0; n<SACN_BUFFER_MAX; n++) {
-    	_packet_buffer[n] = 0;
-    	if ( n < SACN_CID_LENGTH ) {
-    		 _dmx_sender_id[n] = 0;
-    	}
-    }
+    //zero buffer and CID
+    memset(_packet_buffer, 0, SACN_BUFFER_MAX);
+    memset(_dmx_sender_id, 0, SACN_CID_LENGTH);
+    memset(_dmx_sender_id_b, 0, SACN_CID_LENGTH);
+    
+    _using_htp    = 0;
+    _dmx_buffer_a = 0;
+    _dmx_buffer_b = 0;
+    _dmx_buffer_c = 0;
     
     _dmx_slots = 0;
+    _dmx_slots_a = 0;
+    _dmx_slots_b = 0;
     _universe = 1;                    // NOTE: unlike Art-Net, sACN universes begin at 1
     _sequence = 1;
 }
@@ -60,6 +69,25 @@ void LXSACN::setUniverse ( uint8_t u ) {
 	_universe = u;
 }
 
+void LXSACN::enableHTP() {
+#if defined(__AVR_ATmega168__) || defined(__AVR_ATmega328P__) || defined(__AVR_ATmega328__)
+	// not enough memory on these to allocate these buffers
+#else
+	if ( ! _using_htp ) {
+		_dmx_buffer_a = (uint8_t*) malloc(DMX_UNIVERSE_SIZE);
+		_dmx_buffer_b = (uint8_t*) malloc(DMX_UNIVERSE_SIZE);
+		_dmx_buffer_c = (uint8_t*) malloc(DMX_UNIVERSE_SIZE);
+		for(int i=0; i<DMX_UNIVERSE_SIZE; i++) {
+		   _dmx_buffer_a[i] = 0;
+		   _dmx_buffer_b[i] = 0;
+		   _dmx_buffer_c[i] = 0;
+		}
+		
+		_using_htp = 1;
+	}
+#endif
+}
+
 int  LXSACN::numberOfSlots ( void ) {
 	return _dmx_slots;
 }
@@ -70,6 +98,10 @@ void LXSACN::setNumberOfSlots ( int n ) {
 
 uint8_t LXSACN::getSlot ( int slot ) {
 	return _packet_buffer[SACN_ADDRESS_OFFSET+slot];
+}
+
+uint8_t LXSACN::getHTPSlot ( int slot ) {
+	return _dmx_buffer_c[slot-1];
 }
 
 void LXSACN::setSlot ( int slot, uint8_t value ) {
@@ -89,29 +121,32 @@ uint8_t* LXSACN::dmxData( void ) {
 }
 
 uint8_t LXSACN::readDMXPacket ( UDP* eUDP ) {
-   if ( readSACNPacket(eUDP) > 0 ) {
-   	return ( startCode() == 0 );
-   }	
-   return 0;
-}
-
-uint8_t LXSACN::readDMXPacketContents ( UDP* eUDP, uint16_t packetSize ) {
-	if ( parse_root_layer(packetSize) > 0 ) {
+   if ( readSACNPacket(eUDP) ) {
    	if ( startCode() == 0 ) {
    		return RESULT_DMX_RECEIVED;
    	}
    }	
+   return 0;
+}
+
+uint8_t LXSACN::readDMXPacketContents ( UDP* eUDP, int packetSize ) {
+   if ( packetSize > 0 ) {
+		if ( parse_root_layer(packetSize) ) {
+			if ( startCode() == 0 ) {
+				return RESULT_DMX_RECEIVED;
+			}
+		}
+   }
    return RESULT_NONE;
 }
 
 uint16_t LXSACN::readSACNPacket ( UDP* eUDP ) {
-   _dmx_slots = 0;
    uint16_t packetSize = eUDP->parsePacket();
    if ( packetSize ) {
       packetSize = eUDP->read(_packet_buffer, SACN_BUFFER_MAX);
-      _dmx_slots = parse_root_layer(packetSize);
+      return parse_root_layer(packetSize);
    }
-   return _dmx_slots;
+   return 0;
 }
 
 void LXSACN::sendDMX ( UDP* eUDP, IPAddress to_ip ) {
@@ -120,15 +155,7 @@ void LXSACN::sendDMX ( UDP* eUDP, IPAddress to_ip ) {
     }
    _packet_buffer[0] = 0;
    _packet_buffer[1] = 0x10;
-   _packet_buffer[4] = 'A';
-   _packet_buffer[5] = 'S';
-   _packet_buffer[6] = 'C';
-   _packet_buffer[7] = '-';
-   _packet_buffer[8] = 'E';
-   _packet_buffer[9] = '1';
-   _packet_buffer[10] = '.';
-   _packet_buffer[11] = '1';
-   _packet_buffer[12] = '7';
+   strcpy((char*)&_packet_buffer[4], "ASC-E1.17");
    uint16_t fplusl = _dmx_slots + 110 + 0x7000;
    _packet_buffer[16] = fplusl >> 8;
    _packet_buffer[17] = fplusl & 0xff;
@@ -137,13 +164,7 @@ void LXSACN::sendDMX ( UDP* eUDP, IPAddress to_ip ) {
    _packet_buffer[38] = fplusl >> 8;
    _packet_buffer[39] = fplusl & 0xff;
    _packet_buffer[43] = 0x02;
-   _packet_buffer[44] = 'A';
-   _packet_buffer[45] = 'r';
-   _packet_buffer[46] = 'd';
-   _packet_buffer[47] = 'u';
-   _packet_buffer[48] = 'i';
-   _packet_buffer[49] = 'n';
-   _packet_buffer[50] = 'o';
+   strcpy((char*)&_packet_buffer[44], "Arduino");
    _packet_buffer[108] = 100;	//priority
    if ( _sequence == 0 ) {
      _sequence = 1;
@@ -168,7 +189,10 @@ void LXSACN::sendDMX ( UDP* eUDP, IPAddress to_ip ) {
    eUDP->endPacket();
 }
 
-uint16_t LXSACN::parse_root_layer( uint16_t size ) {
+uint16_t LXSACN::parse_root_layer( int size ) {
+  if ( ! _using_htp ) {
+   	_dmx_slots = 0;		//read into packet buffer which doubles as DMX now invalid until confirmed
+  }
   if  ( _packet_buffer[1] == 0x10 ) {									//preamble size
     if ( strcmp((const char*)&_packet_buffer[4], "ASC-E1.17") == 0 ) {
       uint16_t tsize = size - 16;
@@ -186,9 +210,9 @@ uint16_t LXSACN::parse_framing_layer( uint16_t size ) {
    uint16_t tsize = size - 22;
    if ( checkFlagsAndLength(&_packet_buffer[38], tsize) ) {     // framing pdu length
      if ( _packet_buffer[43] == 0x02 ) {                        // vector dmp is 1.31
-        if ( _packet_buffer[114] == _universe ) {// implementation has 255 universe limit
-          return parse_dmp_layer( tsize );       
-        }
+        if (( _packet_buffer[112] == 0) && ( _packet_buffer[114] == _universe )) {	// implementation has 255 universe limit
+          return parse_dmp_layer( tsize );       					
+        }					// [112] options flags non-zero if preview or universe terminated
      }
    }
    return 0;
@@ -199,19 +223,62 @@ uint16_t LXSACN::parse_dmp_layer( uint16_t size ) {
   if ( checkFlagsAndLength(&_packet_buffer[115], tsize) ) {  // dmp pdu length
     if ( _packet_buffer[117] == 0x02 ) {                     // Set Property
       if ( _packet_buffer[118] == 0xa1 ) {                   // address and data format
-        if ( _dmx_sender_id[0] == 0  ) {			
-          for(int k=0; k<SACN_CID_LENGTH; k++) {		 // if _dmx_sender_id is not set
-            _dmx_sender_id[k] = _packet_buffer[k+22];  // set it to id of this packet
-          }
+        if ( _using_htp ) {
+           uint16_t slots = _packet_buffer[124];      // if same sender, good dmx!
+			  slots += _packet_buffer[123] << 8;
+           copyCIDifEmpty(_dmx_sender_id);
+           if ( checkCID(_dmx_sender_id) ) {
+             _dmx_slots_a  = slots;
+				 if ( _dmx_slots_a > _dmx_slots_b ) {
+					_dmx_slots = _dmx_slots_a;
+				 } else {
+					_dmx_slots = _dmx_slots_b;
+				 }
+				 int di;
+				 int dc = _dmx_slots;
+				 int dt = 125 + 1;
+				 for (di=0; di<dc; di++) {
+					 _dmx_buffer_a[di] = _packet_buffer[dt+di];
+					if ( _dmx_buffer_a[di] > _dmx_buffer_b[di] ) {
+						_dmx_buffer_c[di] = _dmx_buffer_a[di];
+					} else {
+						_dmx_buffer_c[di] = _dmx_buffer_b[di];
+					}
+				 }			//for
+				 return 1;
+           } else {  // not matching first CID
+              copyCIDifEmpty(_dmx_sender_id_b);
+              if ( checkCID(_dmx_sender_id_b) ) {
+                 _dmx_slots_b  = slots;
+					  if ( _dmx_slots_a > _dmx_slots_b ) {
+						 _dmx_slots = _dmx_slots_a;
+					  } else {
+						 _dmx_slots = _dmx_slots_b;
+					  }
+
+					  int di;
+					  int dc = _dmx_slots;
+					  int dt = 125 + 1;
+					  for (di=0; di<dc; di++) {
+						 _dmx_buffer_b[di] = _packet_buffer[dt+di];
+						 if ( _dmx_buffer_a[di] > _dmx_buffer_b[di] ) {
+							_dmx_buffer_c[di] = _dmx_buffer_a[di];
+						 } else {
+							_dmx_buffer_c[di] = _dmx_buffer_b[di];
+						 }
+					  }	//for
+					  return 1;
+				  }	//matched second CID
+           }		//not first CID
+        } else {	//not _using_htp
+			  copyCIDifEmpty(_dmx_sender_id);
+			  if ( checkCID(_dmx_sender_id) ) {
+			    uint16_t slots = _packet_buffer[124];      // if same sender, good dmx!
+			    slots += _packet_buffer[123] << 8;
+			    _dmx_slots = slots;
+			    return 1;
+			  }
         }
-        for(int k=0; k<SACN_CID_LENGTH; k++) {
-          if ( _dmx_sender_id[k] != _packet_buffer[k+22] ) {
-            return 0;
-          } 
-        }
-        uint16_t slots = _packet_buffer[124];      // if same sender, good dmx!
-        slots += _packet_buffer[123] << 8;
-        return slots;
       }
     }
   }
@@ -229,4 +296,21 @@ uint8_t LXSACN::checkFlagsAndLength( uint8_t* flb, uint16_t size ) {
 		}
 	}
 	return 0;
-} 
+}
+
+uint8_t LXSACN::checkCID(uint8_t* cid) {
+  for(int k=0; k<SACN_CID_LENGTH; k++) {
+	 if ( cid[k] != _packet_buffer[k+22] ) {
+		return 0;
+	 } 
+  }
+  return 1;
+}
+
+void LXSACN::copyCIDifEmpty(uint8_t* cid) {
+  if ( cid[0] == 0  ) {			
+    for(int k=0; k<SACN_CID_LENGTH; k++) {
+      cid[k] = _packet_buffer[k+22];
+    }
+  }
+}

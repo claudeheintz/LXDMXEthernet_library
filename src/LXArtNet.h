@@ -112,6 +112,17 @@ class LXArtNet : public LXDMXEthernet {
 * @param s subnet 0-127 + flag 0x80
 */
    void    setNetAddress   ( uint8_t s );
+/*!
+ * @brief enables double buffering of received DMX data, merging from two sources
+ * @discussion enableHTP allocates three 512 byte data buffers A, B, and Merged.
+                         when ArtDMX is received, the data is copied into A or b
+                         based on the IP address of the sender.  The highest level
+                         for each slot is written to the merged HTP buffer.
+                         Read the data from the HTP buffer using getHTPSlot(n).
+                         enableHTP() is not available on an ATmega168, ATmega328, or
+                         ATmega328P due to RAM size.
+ */
+   void    enableHTP();
 
  /*!
  * @brief number of slots (aka addresses or channels)
@@ -132,11 +143,19 @@ class LXArtNet : public LXDMXEthernet {
  */  
    uint8_t  getSlot      ( int slot );
  /*!
+ * @brief get level data from slot/address/channel when merge/double buffering is enabled
+ * @discussion You must call enableHTP() once after the constructor before using getHTPSlot()
+ * @param slot 1 to 512
+ * @return level for slot (0-255)
+ */  
+   uint8_t  getHTPSlot      ( int slot );
+ /*!
  * @brief set level data (0-255) for slot/address/channel
  * @param slot 1 to 512
  * @param value level 0 to 255
  */  
    void     setSlot      ( int slot, uint8_t value );
+
  /*!
  * @brief direct pointer to dmx buffer uint8_t[]
  * @return uint8_t* to dmx data buffer
@@ -161,7 +180,7 @@ class LXArtNet : public LXDMXEthernet {
  * @param packetSize size of received packet
  * @return 1 if packet contains dmx
  */      
-   uint8_t readDMXPacketContents ( UDP* eUDP, uint16_t packetSize );
+   uint8_t readDMXPacketContents ( UDP* eUDP, int packetSize );
  /*!
  * @brief process packet, reading it into _packet_buffer
  * @param eUDP UDP* (used for Poll Reply if applicable)
@@ -174,7 +193,15 @@ class LXArtNet : public LXDMXEthernet {
  * @param packetSize size of received packet
  * @return Art-Net opcode of packet
  */   
-   uint16_t readArtNetPacketContents ( UDP* eUDP, uint16_t packetSize );
+   uint16_t readArtNetPacketContents ( UDP* eUDP, int packetSize );
+   
+ /*!
+ * @brief read dmx data from ArtDMX packet
+ * @param wUDP WiFiUDP (used for Poll Reply if applicable)
+ * @param slots number of slots to read
+ * @return opcode (
+ */   
+   uint16_t readArtDMX ( UDP* eUDP, uint16_t slots, int packetSize );
  /*!
  * @brief send Art-Net ArtDMX packet for dmx output from network
  * @param eUDP UDP* to be used for sending UDP packet
@@ -192,24 +219,21 @@ class LXArtNet : public LXDMXEthernet {
   private:
 /*!
 * @brief buffer that holds contents of incoming or outgoing packet
-* @discussion There is no double buffer for dmx data.
+* @discussion To minimize memory footprint, the default is no double buffer for dmx data.
 *             readArtNetPacket fills the buffer with the payload of the incoming packet.
 *             Previous dmx data is invalidated.
 */
   	uint8_t*   _packet_buffer;
   	
-/*!
-* @brief indicates the _packet_buffer was allocated by the constructor and is private.
-*/
+/// indicates the _packet_buffer was allocated by the constructor and is private.
 	uint8_t   _owns_buffer;
 
-/*!
-* @brief array that holds contents of outgoing ArtPollReply packet
-*/	
+/// array that holds contents of outgoing ArtPollReply packet
 	static uint8_t _reply_buffer[ARTNET_REPLY_SIZE];
-	
+
+
 /// number of slots/address/channels
-  	int       _dmx_slots;
+  	uint16_t  _dmx_slots;
 /// high nibble subnet, low nibble universe
   	uint8_t   _universe;
 /// 7bit net value of Port-Address, Net + Subnet + Universe
@@ -223,6 +247,26 @@ class LXArtNet : public LXDMXEthernet {
   	IPAddress _broadcast_address;
 /// first sender of an ArtDMX packet (subsequent senders ignored until cancelMerge)
   	IPAddress _dmx_sender;
+
+/*!
+* @brief indicates dmx data is double buffered
+* @discussion  In order to support HTPmerge, 3 buffers to hold DMX data must be allocated
+               this is done by calling enableHTP()
+*/
+	uint8_t   _using_htp;
+
+/// buffer that holds dmx data received from first source
+  	uint8_t*  _dmx_buffer_a;
+/// buffer that holds dmx data received from other source
+  	uint8_t*  _dmx_buffer_b;
+/// composite HTP buffer
+  	uint8_t*  _dmx_buffer_c;
+/// number of slots/address/channels
+  	uint16_t  _dmx_slots_a;
+/// number of slots/address/channels
+  	uint16_t  _dmx_slots_b;
+/// second sender of an ArtDMX packet
+  	IPAddress _dmx_sender_b;
 
 /*!
 * @brief checks packet for "Art-Net" header

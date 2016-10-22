@@ -8,7 +8,7 @@
     Example using LXDMXEthernet_Library for output of Art-Net or E1.31 sACN from
     EEthernet connection to DMX
     
-    Art-Net(TM) Designed by and Copyright Artistic Licence (UK) Ltd
+    Art-Net(TM) Designed by and Copyright Artistic Licence Holdings Ltd.
     sACN E 1.31 is a public standard published by the PLASA technical standards program
     
     Note:  2 Universes may excede the memory available on ATmega328 boards

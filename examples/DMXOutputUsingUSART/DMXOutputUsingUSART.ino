@@ -34,7 +34,7 @@ TX |----------------------| 4 DI   Gnd 5 |---+------------ Pin 1
  (see bottom of file for revision history)
 
  See LXArduinoDMXUSART.h or http://lx.claudeheintzdesign.com/opensource.html for license.
- Art-Net(tm) Designed by and Copyright Artistic Licence (UK) Ltd.
+ Art-Net(tm) Designed by and Copyright Artistic Licence Holdings Ltd.
 
  */
 

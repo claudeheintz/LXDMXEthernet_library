@@ -14,7 +14,7 @@
    from the first IP address that it receives a packet from.
    This can be reset by sending an ArtAddress cancel merge command.
       
-	Art-Net(TM) Designed by and Copyright Artistic Licence (UK) Ltd
+	Art-Net(TM) Designed by and Copyright Artistic Licence Holdings Ltd.
 */
 
 #include "LXArtNet.h"

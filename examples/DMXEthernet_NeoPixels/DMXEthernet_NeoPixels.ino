@@ -87,7 +87,7 @@ void setup() {
 //*********************** main loop *******************
 void loop() {
   uint16_t r,g,b;
-  uint8_t i;
+  uint16_t i;
   
   // read a packet and if the packet is dmx, write its data to the pixels
   if ( interface->readDMXPacket(&eUDP) == RESULT_DMX_RECEIVED ) {

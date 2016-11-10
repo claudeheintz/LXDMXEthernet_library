@@ -10,7 +10,7 @@
     @section  HISTORY
 
     v1.0   First release
-    v1.1 - Consolidated input and output into single class with defined LXSerialDMX instance
+    v1.1 - Consolidated input and output into single class
 */
 /**************************************************************************/
 #include "pins_arduino.h"

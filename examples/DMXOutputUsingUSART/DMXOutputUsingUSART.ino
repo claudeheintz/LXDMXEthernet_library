@@ -71,7 +71,7 @@ TX |----------------------| 4 DI   Gnd 5 |---+------------ Pin 1
    interface ip address, it will not receive broadcast packets.)
 */
 
-#define USE_DHCP 0
+#define USE_DHCP 1
 #define USE_SACN 0
 
 //  Uncomment to use multicast, which requires extended Ethernet library
@@ -79,8 +79,8 @@ TX |----------------------| 4 DI   Gnd 5 |---+------------ Pin 1
 
 //#define USE_MULTICAST 1
 
-#define MAC_ADDRESS 0xDD, 0x43, 0x34, 0x4C, 0x29, 0x7E
-#define IP_ADDRESS 192,168,1,140
+#define MAC_ADDRESS 0x90, 0xA2, 0xDA, 0x10, 0x6C, 0xA8
+#define IP_ADDRESS 192,168,1,20
 #define GATEWAY_IP 192,168,1,1
 #define SUBNET_MASK 255,255,255,0
 #define BROADCAST_IP 192,168,1,255
@@ -181,6 +181,7 @@ void setup() {
   LXSerialDMX.startOutput();
   
   if ( ! USE_SACN ) {
+   ((LXArtNet*)interface)->setNodeName("ArtNet2USART");
   	((LXArtNet*)interface)->send_art_poll_reply(&eUDP);
   }
   blinkLED();

@@ -173,6 +173,11 @@ uint8_t* LXArtNet::replyData( void ) {
 	return _reply_buffer;
 }
 
+void LXArtNet::setNodeName( const char* name ) {
+	//strcpy((char*)&_reply_buffer[26], name);
+	strcpy((char*)&_reply_buffer[44], name);
+}
+
 uint8_t LXArtNet::readDMXPacket ( UDP* eUDP ) {
    uint16_t opcode = readArtNetPacket(eUDP);
    if ( opcode == ARTNET_ART_DMX ) {

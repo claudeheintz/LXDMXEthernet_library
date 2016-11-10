@@ -14,7 +14,7 @@
 
 #define ARTNET_PORT 0x1936
 #define ARTNET_BUFFER_MAX 530
-#define ARTNET_REPLY_SIZE 239
+#define ARTNET_REPLY_SIZE 240
 #define ARTNET_ADDRESS_OFFSET 17
 
 #define ARTNET_ART_POLL 0x2000
@@ -166,6 +166,12 @@ class LXArtNet : public LXDMXEthernet {
  * @return uint8_t* to poll reply packet contents
  */ 
    uint8_t* replyData      ( void );
+   
+/*!
+ * @brief direct pointer to poll reply packet contents
+ * @return uint8_t* to poll reply packet contents
+ */ 
+   void     setNodeName    ( const char* name );
 
  /*!
  * @brief read UDP packet

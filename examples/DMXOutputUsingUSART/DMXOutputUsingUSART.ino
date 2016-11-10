@@ -120,7 +120,11 @@ EthernetUDP eUDP;
 LXDMXEthernet* interface;
 
 // sACN uses multicast, Art-Net uses broadcast. Both can be set to unicast (use_multicast = 0)
+#if defined ( USE_MULTICAST )
 uint8_t use_multicast = USE_SACN;
+#else
+uint8_t use_multicast = 0;
+#endif
 
 //  used to toggle on and off the LED when DMX is Received
 int monitorstate = LOW;
@@ -172,7 +176,9 @@ void setup() {
   }
   
   if ( use_multicast ) {                  // Start listening for UDP on port
+  #if defined ( USE_MULTICAST )
     eUDP.beginMulticast(IPAddress(239,255,0,1), interface->dmxPort());
+  #endif
   } else {
     eUDP.begin(interface->dmxPort());
   }

@@ -50,10 +50,13 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
    
    Note:  LXDMXEthernet_library requires
           Ethernet library used with the original Arduino Ethernet Shield
-          For the Ethernet v2 shield, use LXDMXEthernet2_library along with Ethernet2 Library
+          For the Ethernet v2 shield, use the Ethernet2 Library.
+          If the sketch compiles and loads correctly but there is no indication of packets
+          being received, check to make sure the version of the Ethernet library matches
+          that of your shield.
           
-          For multicast, EthernetUdp.h and EthernetUdp2.cpp in the Ethernet library
-          must be modified to add the beginMulticast method.
+          For multicast, EthernetUdp.h/EthernetUdp2.cpp in the Ethernet/Ethernet2 library
+          may need to be modified to add the beginMulticast method.
           See the code at the bottom of LXDMXEthernet.h
 */
 
@@ -156,21 +159,26 @@ class LXDMXEthernet {
 
 see  https://github.com/aallan/Arduino/blob/3811729f82ef05f3ae43341022e7b65a92d333a2/libraries/Ethernet/EthernetUdp.cpp
 
-1) Locate the Ethernet library in the IDE
-   Mac OS X Control-click Arduino.app and select "Show Package Contents" from the popup menu
-            Navigate to Arduino.app/Contents/Java/libraries/Ethernet
+1) Locate the Ethernet (Etrhernet2) library in the IDE
+   If you have installed the library, it will be located with other libraries in the <sketchbook>/libraries folder.
+   If it is included in the IDE, you will need to search within the IDE files to find the libraries folder.
+   On MacOS this is located at Arduino.app/Contents/Java/libraries.
    
-2) Duplicate the Ethernet library in your sketchbook folder (~/Documents/Arduino/libraries)
+2) If modifying the built-in library, duplicate the Ethernet library folder in your sketchbook folder
+   (~/Documents/Arduino/libraries)  This will override the built-in library.  If you modify
+   a built-in library directly, your changes will be lost if you later upgrade the IDE.
+   
+3)
    Add the required method as follows:
 
-3)  In EthernetUdph add the beginMulticast method declaration:
+3A)  In EthernetUdph add the beginMulticast method declaration:
 ...
   EthernetUdp();  // Constructor
   virtual uint8_t begin(uint16_t);	// initialize, start listening on specified port. Returns 1 if successful, 0 if there are no sockets available to use
   uint8_t beginMulticast(IPAddress ip, uint16_t port);  //############## added to standard library
 ...
 
-4)  In EthernetUdp.cpp add the method body:
+3B)  In EthernetUdp.cpp add the method body:
 
 uint8_t EthernetUdp::beginMulticast(IPAddress ip, uint16_t port) {
     if (_sock != MAX_SOCK_NUM)

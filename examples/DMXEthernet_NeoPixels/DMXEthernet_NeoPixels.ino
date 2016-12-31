@@ -1,7 +1,19 @@
 #include <SPI.h>
 
-// #### Important to use with Ethernet Shield v2, uncomment the next line ####
-//#define ETHERNET_SHIELD_V2
+/******** Important note about Ethernet library ********
+   There are various ethernet shields that use differnt Wiznet chips w5100, w5200, w5500
+   It is necessary to use an Ethernet library that supports the correct chip for your shield
+   Perhaps the best library is the one by Paul Stoffregen which supports all three chips:
+   
+   https://github.com/PaulStoffregen/Ethernet
+
+   The Paul Stoffregen version is much faster than the built-in Ethernet library and is
+   neccessary if the shield receives more than a single universe of packets.
+   
+   The Ethernet Shield v2 uses a w5500 chip and will not work with the built-in Ethernet library
+   The library manager does have an Ethernet2 library which supports the w5500.  To use this,
+   uncomment the line to define ETHERNET_SHIELD_V2
+*/
 #if defined ( ETHERNET_SHIELD_V2 )
 #include <Ethernet2.h>
 #include <EthernetUdp2.h>

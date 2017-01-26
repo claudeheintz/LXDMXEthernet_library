@@ -275,11 +275,15 @@ uint16_t LXArtNet::readArtDMX ( UDP* eUDP, uint16_t slots, int packetSize ) {
 			int dc = _dmx_slots;
 			int dt = ARTNET_ADDRESS_OFFSET + 1;
 			  for (di=0; di<dc; di++) {
-				 _dmx_buffer_a[di] = _packet_buffer[dt+di];
+				if ( di < slots ) {								// total slots may be greater than slots in this packet
+					_dmx_buffer_a[di] = _packet_buffer[dt+di];
+				}  else {										// don't read beyond end of received slots
+					_dmx_buffer_a[di] = 0;						// set remainder to zero	
+				}
 				if ( _dmx_buffer_a[di] > _dmx_buffer_b[di] ) {
 					_dmx_buffer_c[di] = _dmx_buffer_a[di];
 				} else {
-					_dmx_buffer_c[di] = _dmx_buffer_b[di];
+					_dmx_buffer_c[di] = _dmx_buffer_b[di]; 
 				}
 			}
 			opcode = ARTNET_ART_DMX;
@@ -298,12 +302,16 @@ uint16_t LXArtNet::readArtDMX ( UDP* eUDP, uint16_t slots, int packetSize ) {
 			  int dc = _dmx_slots;
 			  int dt = ARTNET_ADDRESS_OFFSET + 1;
 			  for (di=0; di<dc; di++) {
-				 _dmx_buffer_b[di] = _packet_buffer[dt+di];
-				 if ( _dmx_buffer_a[di] > _dmx_buffer_b[di] ) {
+				if ( di < slots ) {								//total slots may be greater than slots in this packet				
+					_dmx_buffer_b[di] = _packet_buffer[dt+di];
+				}  else {											//don't read beyond end of received slots	
+					_dmx_buffer_b[di] = 0;							//set remainder to zero	
+				}
+				if ( _dmx_buffer_a[di] > _dmx_buffer_b[di] ) {
 					_dmx_buffer_c[di] = _dmx_buffer_a[di];
-				 } else {
+				} else {
 					_dmx_buffer_c[di] = _dmx_buffer_b[di];
-				 }
+				}
 			  }
 			  opcode = ARTNET_ART_DMX;
 			}  // matched sender b

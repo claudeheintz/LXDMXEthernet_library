@@ -43,10 +43,14 @@
 #if defined ( ETHERNET_SHIELD_V2 )
 #include <Ethernet2.h>
 #include <EthernetUdp2.h>
+#include <utility/w5500.h>
 #else
 #include <Ethernet.h>
 #include <EthernetUdp.h>
+#include <utility/w5100.h>
 #endif
+
+#include <IPAddress.h>
 
 
 #include <LXDMXEthernet.h>
@@ -67,19 +71,16 @@
 
 #define USE_DHCP 1
 #define USE_SACN 1
-
-//  Uncomment to use multicast, which requires extended Ethernet library
-//  see note in LXDMXEthernet.h file about method added to library
-
-#define USE_MULTICAST 1
+// comment out next line for unicast sACN
+//#define USE_MULTICAST 1
 
 #define MAC_ADDRESS 0x90, 0xA2, 0xDA, 0x10, 0x6C, 0xA8
 #define IP_ADDRESS 192,168,1,20
 #define GATEWAY_IP 192,168,1,1
 #define SUBNET_MASK 255,255,255,0
 #define BROADCAST_IP 192,168,1,255
-
-#define TARGET_IP 192,168,1,12
+// this is the IP address to which output packets are sent, unless multicast is used
+#define TARGET_IP 192,168,1,255
 
 // this sketch flashes an indicator led:
 #define LED_PIN 3
@@ -176,8 +177,8 @@ void setup() {
   LXSerialDMX.startInput();
 
   if ( use_multicast ) {
-    //eUDP.begin(interface->dmxPort());
-    eUDP.beginMulticast(send_address,  interface->dmxPort()); 
+    //eUDP.beginMulticast(send_address,  interface->dmxPort() - 1);
+    eUDP.begin(interface->dmxPort());
   } else {
     eUDP.begin(interface->dmxPort());
   }
@@ -206,12 +207,10 @@ void loop() {
     for(int i=1; i<=got_dmx; i++) {
       interface->setSlot(i, LXSerialDMX.getSlot(i));
     }
-    if ( got_dmx > 500 ) {
-      analogWrite(LED_PIN, interface->getSlot(2));
-    }
+    blinkLED();
     
     interface->sendDMX(&eUDP, send_address);
-    
+
     got_dmx = 0;
   } else {
     digitalWrite(LED_PIN, LOW);

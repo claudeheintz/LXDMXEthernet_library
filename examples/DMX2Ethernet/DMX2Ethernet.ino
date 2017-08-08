@@ -43,15 +43,10 @@
 #if defined ( ETHERNET_SHIELD_V2 )
 #include <Ethernet2.h>
 #include <EthernetUdp2.h>
-#include <utility/w5500.h>
 #else
 #include <Ethernet.h>
 #include <EthernetUdp.h>
-#include <utility/w5100.h>
 #endif
-
-#include <IPAddress.h>
-
 
 #include <LXDMXEthernet.h>
 #include <LXArtNet.h>

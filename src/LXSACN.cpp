@@ -149,10 +149,11 @@ uint16_t LXSACN::readSACNPacket ( UDP* eUDP ) {
    return 0;
 }
 
-void LXSACN::sendDMX ( UDP* eUDP, IPAddress to_ip ) {
+void LXSACN::sendDMX( UDP* eUDP, IPAddress to_ip ) {
    for (int n=0; n<126; n++) {
     	_packet_buffer[n] = 0;		// zero outside layers & start code
     }
+    //ACN root layer
    _packet_buffer[0] = 0;
    _packet_buffer[1] = 0x10;
    strcpy((char*)&_packet_buffer[4], "ASC-E1.17");
@@ -160,6 +161,27 @@ void LXSACN::sendDMX ( UDP* eUDP, IPAddress to_ip ) {
    _packet_buffer[16] = fplusl >> 8;
    _packet_buffer[17] = fplusl & 0xff;
    _packet_buffer[21] = 0x04;
+
+	//CID (UUID)
+	//fd32aedc-7b94-11e7-bb31-be2e44b06b34
+   _packet_buffer[22] = 0xfd;
+   _packet_buffer[23] = 0x32;
+   _packet_buffer[24] = 0xae;
+   _packet_buffer[25] = 0xdc;
+   _packet_buffer[26] = 0x7b;
+   _packet_buffer[27] = 0x94;
+   _packet_buffer[28] = 0x11;
+   _packet_buffer[29] = 0xe7;
+   _packet_buffer[30] = 0xbb;
+   _packet_buffer[31] = 0x31;
+   _packet_buffer[32] = 0xbe;
+   _packet_buffer[33] = 0x2e;
+   _packet_buffer[34] = 0x44;
+   _packet_buffer[35] = 0xb0;
+   _packet_buffer[36] = 0x6b;
+   _packet_buffer[37] = 0x34;
+   
+   //ACN framing layer
    fplusl = _dmx_slots + 88 + 0x7000;
    _packet_buffer[38] = fplusl >> 8;
    _packet_buffer[39] = fplusl & 0xff;
@@ -174,16 +196,20 @@ void LXSACN::sendDMX ( UDP* eUDP, IPAddress to_ip ) {
    _packet_buffer[111] = _sequence;
    _packet_buffer[113] = _universe >> 8;
    _packet_buffer[114] = _universe & 0xff;
+   
+   //ACN DMP layer
    fplusl = _dmx_slots + 11 + 0x7000;
    _packet_buffer[115] = fplusl >> 8;
    _packet_buffer[116] = fplusl & 0xff;
    _packet_buffer[117] = 0x02;
    _packet_buffer[118] = 0xa1;
    _packet_buffer[122] = 0x01;
-   fplusl = _dmx_slots + 1;
+   fplusl = _dmx_slots + 1;	//plus 1 byte for start code
    _packet_buffer[123] = fplusl >> 8;
    _packet_buffer[124] = fplusl & 0xFF;
+   
    //assume dmx data has been set
+   // _packet_buffer[125] is start code (0)
    eUDP->beginPacket(to_ip, SACN_PORT);
    eUDP->write(_packet_buffer, _dmx_slots + 126);
    eUDP->endPacket();

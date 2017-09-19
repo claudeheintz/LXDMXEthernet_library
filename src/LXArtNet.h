@@ -15,13 +15,22 @@
 #define ARTNET_PORT 0x1936
 #define ARTNET_BUFFER_MAX 530
 #define ARTNET_REPLY_SIZE 240
+#define ARTNET_TOD_PKT_SIZE	1228
+#define ARTNET_RDM_PKT_SIZE 281
 #define ARTNET_ADDRESS_OFFSET 17
 
 #define ARTNET_ART_POLL 0x2000
 #define ARTNET_ART_POLL_REPLY 0x2100
 #define ARTNET_ART_DMX 0x5000
 #define ARTNET_ART_ADDRESS 0x6000
+#define ARTNET_ART_TOD_REQUEST	0x8000
+#define ARTNET_ART_TOD_CONTROL	0x8200
+#define ARTNET_ART_RDM			0x8300
 #define ARTNET_NOP 0
+
+
+typedef void (*ArtNetReceiveCallback)(void);
+typedef void (*ArtNetRDMRecvCallback)(uint8_t* pdata);
 
 /*!
 @class LXArtNet
@@ -222,6 +231,38 @@ class LXArtNet : public LXDMXEthernet {
  */  
    void     send_art_poll_reply ( UDP* eUDP );
    
+   /*!
+ * @brief send ArtTOD packet for dmx output from network
+ * @discussion 
+ * @param wUDP		pointer to UDP object to be used for sending UDP packet
+ * @param todata	pointer to TOD array of 6 byte UIDs
+ * @param ucount	number of 6 byte UIDs contained in todata
+ */    
+   void     send_art_tod ( UDP* wUDP, uint8_t* todata, uint8_t ucount );
+   
+/*!
+ * @brief send ArtRDM packet
+ * @discussion 
+ * @param wUDP		pointer to UDP object to be used for sending UDP packet
+ * @param rdmdata	pointer to rdm packet to be sent
+ * @param toa		IPAddress to send UDP ArtRDM packet    
+ */ 
+   void send_art_rdm ( UDP* wUDP, uint8_t* rdmdata, IPAddress toa );
+   
+/*!
+ * @brief function callback when ArtTODRequest is received
+ * @discussion callback pointer is to integer
+ *             to distinguish between ARTNET_ART_TOD_REQUEST *0
+ *             and ARTNET_ART_TOD_CONTROL *1
+*/
+   void setArtTodRequestCallback(ArtNetRDMRecvCallback callback);
+   
+   /*!
+	* @brief function callback when ArtRDM is received
+	* @discussion callback has pointer to RDM payload
+	*/
+   void setArtRDMCallback(ArtNetRDMRecvCallback callback);
+   
   private:
 /*!
 * @brief buffer that holds contents of incoming or outgoing packet
@@ -273,6 +314,16 @@ class LXArtNet : public LXDMXEthernet {
   	uint16_t  _dmx_slots_b;
 /// second sender of an ArtDMX packet
   	IPAddress _dmx_sender_b;
+  	
+  	/*!
+    * @brief Pointer to art tod request callback
+   */
+  	ArtNetRDMRecvCallback _art_tod_req_callback;
+  	
+  	/*!
+    * @brief Pointer to art RDM packet received callback function
+   */
+  	ArtNetRDMRecvCallback _art_rdm_callback;
 
 /*!
 * @brief checks packet for "Art-Net" header
@@ -284,6 +335,17 @@ class LXArtNet : public LXDMXEthernet {
 * @return opcode in case command changes dmx data
 */
    uint16_t  parse_art_address   ( void );
+   
+/*!
+* @brief utility for parsing ArtTODRequest packets
+*/     
+   uint16_t parse_art_tod_request( UDP* wUDP );
+   uint16_t parse_art_tod_control( UDP* wUDP );
+   
+/*!
+* @brief utility for parsing ArtRDM packets
+*/     
+   uint16_t parse_art_rdm( UDP* wUDP );
    
 /*!
 * @brief initialize data structures

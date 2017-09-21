@@ -19,18 +19,21 @@
 #define ARTNET_RDM_PKT_SIZE 281
 #define ARTNET_ADDRESS_OFFSET 17
 
-#define ARTNET_ART_POLL 0x2000
-#define ARTNET_ART_POLL_REPLY 0x2100
-#define ARTNET_ART_DMX 0x5000
-#define ARTNET_ART_ADDRESS 0x6000
+#define ARTNET_ART_POLL 		0x2000
+#define ARTNET_ART_POLL_REPLY	0x2100
+#define ARTNET_ART_CMD			0x2400
+#define ARTNET_ART_DMX			0x5000
+#define ARTNET_ART_ADDRESS		0x6000
+#define ARTNET_ART_IPPROG		0xF800
+#define ARTNET_ART_IPPROG_REPLY 0xF900
 #define ARTNET_ART_TOD_REQUEST	0x8000
 #define ARTNET_ART_TOD_CONTROL	0x8200
 #define ARTNET_ART_RDM			0x8300
-#define ARTNET_NOP 0
+#define ARTNET_NOP 				0x0000
 
 
 typedef void (*ArtNetReceiveCallback)(void);
-typedef void (*ArtNetRDMRecvCallback)(uint8_t* pdata);
+typedef void (*ArtNetDataRecvCallback)(uint8_t* pdata);
 
 /*!
 @class LXArtNet
@@ -255,13 +258,19 @@ class LXArtNet : public LXDMXEthernet {
  *             to distinguish between ARTNET_ART_TOD_REQUEST *0
  *             and ARTNET_ART_TOD_CONTROL *1
 */
-   void setArtTodRequestCallback(ArtNetRDMRecvCallback callback);
+   void setArtTodRequestCallback(ArtNetDataRecvCallback callback);
    
    /*!
 	* @brief function callback when ArtRDM is received
 	* @discussion callback has pointer to RDM payload
 	*/
-   void setArtRDMCallback(ArtNetRDMRecvCallback callback);
+   void setArtRDMCallback(ArtNetDataRecvCallback callback);
+   
+   /*!
+	* @brief function callback when ArtCommand is received
+	* @discussion callback has pointer to command string
+	*/
+   void setArtCommandCallback(ArtNetDataRecvCallback callback);
    
   private:
 /*!
@@ -318,12 +327,17 @@ class LXArtNet : public LXDMXEthernet {
   	/*!
     * @brief Pointer to art tod request callback
    */
-  	ArtNetRDMRecvCallback _art_tod_req_callback;
+  	ArtNetDataRecvCallback _art_tod_req_callback;
   	
   	/*!
     * @brief Pointer to art RDM packet received callback function
    */
-  	ArtNetRDMRecvCallback _art_rdm_callback;
+  	ArtNetDataRecvCallback _art_rdm_callback;
+  	
+  	/*!
+    * @brief Pointer to art Command packet received callback function
+   */
+  	ArtNetDataRecvCallback _art_cmd_callback;
 
 /*!
 * @brief checks packet for "Art-Net" header
@@ -346,6 +360,11 @@ class LXArtNet : public LXDMXEthernet {
 * @brief utility for parsing ArtRDM packets
 */     
    uint16_t parse_art_rdm( UDP* wUDP );
+   
+/*!
+* @brief utility for parsing ArtCommand packets
+*/   
+   void parse_art_cmd( UDP* wUDP );
    
 /*!
 * @brief initialize data structures

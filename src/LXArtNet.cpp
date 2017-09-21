@@ -93,6 +93,7 @@ void  LXArtNet::initialize  ( uint8_t* b ) {
     
     _art_tod_req_callback = 0;
     _art_rdm_callback = 0;
+    _art_cmd_callback = 0;
 }
 
 
@@ -271,6 +272,9 @@ uint16_t LXArtNet::readArtNetPacketContents ( UDP* eUDP, int packetSize ) {
 		   if (( packetSize >= 24 ) && ( _packet_buffer[11] >= 14 )) {
 				opcode = parse_art_rdm( eUDP );
 			}
+			break;
+		case ARTNET_ART_CMD:
+			parse_art_cmd( eUDP );
 			break;
 	}
    return opcode;
@@ -459,12 +463,16 @@ void LXArtNet::send_art_rdm ( UDP* wUDP, uint8_t* rdmdata, IPAddress toa ) {
 	wUDP->endPacket();
 }
 
-void LXArtNet::setArtTodRequestCallback(ArtNetRDMRecvCallback callback) {
+void LXArtNet::setArtTodRequestCallback(ArtNetDataRecvCallback callback) {
 	_art_tod_req_callback = callback;
 }
 
-void LXArtNet::setArtRDMCallback(ArtNetRDMRecvCallback callback) {
-		_art_rdm_callback = callback;
+void LXArtNet::setArtRDMCallback(ArtNetDataRecvCallback callback) {
+	_art_rdm_callback = callback;
+}
+
+void LXArtNet::setArtCommandCallback(ArtNetDataRecvCallback callback) {
+	_art_cmd_callback = callback;
 }
 
 uint16_t LXArtNet::parse_header( void ) {
@@ -546,6 +554,16 @@ uint16_t LXArtNet::parse_art_rdm( UDP* wUDP ) {
 		}
 	}
 	return ARTNET_NOP;
+}
+
+void LXArtNet::parse_art_cmd( UDP* wUDP ) {
+	if ( _art_cmd_callback != NULL ) {
+		if ( _packet_buffer[12] == 0xFF ) {			// wildcard mfg ID
+			if ( _packet_buffer[13] == 0xFF ) {
+				_art_cmd_callback(&_packet_buffer[16]);
+			}
+		}
+	}
 }
 
 void  LXArtNet::initializePollReply  ( void ) {

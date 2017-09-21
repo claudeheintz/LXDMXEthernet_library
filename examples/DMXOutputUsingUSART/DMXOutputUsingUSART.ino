@@ -216,6 +216,7 @@ void setup() {
 *************************************************************************/
 
 void loop() {
+	Ethernet.maintain();
 	uint8_t result = interface->readDMXPacket(&eUDP);
 
   if ( result == RESULT_DMX_RECEIVED ) {

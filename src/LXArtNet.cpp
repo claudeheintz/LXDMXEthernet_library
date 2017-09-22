@@ -401,7 +401,7 @@ void LXArtNet::sendDMX ( UDP* eUDP, IPAddress to_ip ) {
 */
 void LXArtNet::send_art_poll_reply( UDP* eUDP ) {
 	_reply_buffer[18]  = _net;
-	_reply_buffer[18]  = (_universe >> 4) & 0x0f;
+	_reply_buffer[19]  = (_universe >> 4) & 0x0f;
 	_reply_buffer[190] = _universe & 0x0f;
   
   IPAddress a = _broadcast_address;

@@ -124,6 +124,14 @@ class LXArtNet : public LXDMXEthernet {
 * @param s subnet 0-127 + flag 0x80
 */
    void    setNetAddress   ( uint8_t s );
+   
+/*!
+* @brief set local IPAddress for ArtPollReply
+* @discussion should be called if IPAddress changes
+*/
+   void setLocalIP ( IPAddress a );
+   void setLocalIP ( IPAddress a, IPAddress sn );
+   
 /*!
  * @brief enables double buffering of received DMX data, merging from two sources
  * @discussion enableHTP allocates three 512 byte data buffers A, B, and Merged.

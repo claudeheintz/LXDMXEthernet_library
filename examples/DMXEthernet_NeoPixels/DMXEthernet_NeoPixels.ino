@@ -119,4 +119,13 @@ void loop() {
     // send to NeoPixel Ring
     ring.show();
   }
+  
+  if ( USE_DHCP ) {
+    uint8_t dhcpr = Ethernet.maintain();
+    if (( dhcpr == 4 ) || (dhcpr == 2)) {	//renew/rebind success
+      if ( ! USE_SACN ) {
+        ((LXArtNet*)interface)->setLocalIP(Ethernet.localIP(), Ethernet.subnetMask());
+      }
+    }
+  }
 }

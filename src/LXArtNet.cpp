@@ -25,25 +25,21 @@ uint8_t LXArtNet::_reply_buffer[ARTNET_REPLY_SIZE];
 LXArtNet::LXArtNet ( IPAddress address )
 {
 	initialize(0);
-	
-    _my_address = address;
+	setLocalIP( address );
     _broadcast_address = INADDR_NONE;
 }
 
 LXArtNet::LXArtNet ( IPAddress address, IPAddress subnet_mask )
 {
 	initialize(0);
-	
-    _my_address = address;
-    uint32_t a = (uint32_t) address;
-    uint32_t s = (uint32_t) subnet_mask;
-    _broadcast_address = IPAddress(a | ~s);
+	setLocalIP( address, subnet_mask );
 }
 
 LXArtNet::LXArtNet ( IPAddress address, IPAddress subnet_mask, uint8_t* buffer )
 {
 	initialize(buffer);
-    _my_address = address;
+	setLocalIP( address, subnet_mask );
+	
     uint32_t a = (uint32_t) address;
     uint32_t s = (uint32_t) subnet_mask;
     _broadcast_address = IPAddress(a | ~s);
@@ -129,6 +125,22 @@ void LXArtNet::setNetAddress ( uint8_t s ) {
 	if ( s & 0x80 ) {
 	  _net = (s & 0x7F);
 	}
+}
+
+void LXArtNet::setLocalIP ( IPAddress a ) {
+	_my_address = a;
+	_reply_buffer[10] = ((uint32_t)_my_address) & 0xff;      //ip address
+  	_reply_buffer[11] = ((uint32_t)_my_address) >> 8;
+  	_reply_buffer[12] = ((uint32_t)_my_address) >> 16;
+  	_reply_buffer[13] = ((uint32_t)_my_address) >>24;
+}
+
+void LXArtNet::setLocalIP ( IPAddress a, IPAddress sn ) {
+	setLocalIP(a);
+	// calculate broadcast address
+	uint32_t a32 = (uint32_t) a;
+    uint32_t s32 = (uint32_t) sn;
+    _broadcast_address = IPAddress( a32 | ~s32 );
 }
 
 void LXArtNet::enableHTP() {
@@ -388,7 +400,9 @@ void LXArtNet::sendDMX ( UDP* eUDP, IPAddress to_ip ) {
   includes my_ip as address of this node
 */
 void LXArtNet::send_art_poll_reply( UDP* eUDP ) {
-	_reply_buffer[190] = _universe;
+	_reply_buffer[18]  = _net;
+	_reply_buffer[18]  = (_universe >> 4) & 0x0f;
+	_reply_buffer[190] = _universe & 0x0f;
   
   IPAddress a = _broadcast_address;
   if ( a == INADDR_NONE ) {
@@ -578,7 +592,7 @@ void  LXArtNet::initializePollReply  ( void ) {
   _reply_buffer[10] = ((uint32_t)_my_address) & 0xff;      //ip address
   _reply_buffer[11] = ((uint32_t)_my_address) >> 8;
   _reply_buffer[12] = ((uint32_t)_my_address) >> 16;
-  _reply_buffer[13] = ((uint32_t)_my_address) >>24;
+  _reply_buffer[13] = ((uint32_t)_my_address) >> 24;
   _reply_buffer[14] = 0x36;    // port lo first always 0x1936
   _reply_buffer[15] = 0x19;
   _reply_buffer[16] = 0;       // firmware hi-lo

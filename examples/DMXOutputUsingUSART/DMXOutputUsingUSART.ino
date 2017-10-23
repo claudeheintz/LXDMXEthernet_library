@@ -41,7 +41,6 @@ TX |----------------------| 4 DI   Gnd 5 |---+------------ Pin 1
 //*********************** includes ***********************
 
 #include "LXArduinoDMXUSART.h"
-
 #include <SPI.h>
 
 /******** Important note about Ethernet library ********
@@ -58,6 +57,8 @@ TX |----------------------| 4 DI   Gnd 5 |---+------------ Pin 1
    The library manager does have an Ethernet2 library which supports the w5500.  To use this,
    uncomment the line to define ETHERNET_SHIELD_V2
 */
+#define ETHERNET_SHIELD_V2 1
+
 #if defined ( ETHERNET_SHIELD_V2 )
 #include <Ethernet2.h>
 #include <EthernetUdp2.h>
@@ -65,7 +66,6 @@ TX |----------------------| 4 DI   Gnd 5 |---+------------ Pin 1
 #include <Ethernet.h>
 #include <EthernetUdp.h>
 #endif
-
 
 #include <LXDMXEthernet.h>
 #include <LXArtNet.h>
@@ -85,6 +85,7 @@ TX |----------------------| 4 DI   Gnd 5 |---+------------ Pin 1
 
 #define USE_DHCP 1
 #define USE_SACN 0
+#define ARTNET_NODE_NAME "my Art-Net node"
 
 //  Uncomment to use multicast, which requires extended Ethernet library
 //  see note in LXDMXEthernet.h file about method added to library
@@ -199,7 +200,7 @@ void setup() {
   LXSerialDMX.startOutput();
   
   if ( ! USE_SACN ) {
-   ((LXArtNet*)interface)->setNodeName("ArtNet2USART");
+   ((LXArtNet*)interface)->setNodeName(ARTNET_NODE_NAME);
   	((LXArtNet*)interface)->send_art_poll_reply(&eUDP);
   }
   blinkLED();

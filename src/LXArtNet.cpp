@@ -258,7 +258,7 @@ uint16_t LXArtNet::readArtNetPacketContents ( UDP* eUDP, int packetSize ) {
 			break;
 		case ARTNET_ART_ADDRESS:
 			if (( packetSize >= 107 ) && ( _packet_buffer[11] >= 14 )) {  //protocol version [10] hi byte [11] lo byte
-				opcode = parse_art_address();
+				opcode = parse_art_address( eUDP );
 				send_art_poll_reply( eUDP );
 			}
 			break;
@@ -353,19 +353,22 @@ uint16_t LXArtNet::readArtDMX ( UDP* eUDP, uint16_t slots, int packetSize ) {
 			  opcode = ARTNET_ART_DMX;
 			}  // matched sender b
 		}     // did not match sender a
-	} else {												// NOT _using_htp only allow one sender
+	} else {								    // NOTE _using_htp only allow one sender
+#if defined ( NO_HTP_IS_SINGLE_SENDER )
 		if ( (uint32_t)_dmx_sender == 0 ) {		// if first sender, remember address
 			_dmx_sender = eUDP->remoteIP();
 		}
 		if ( _dmx_sender == eUDP->remoteIP() ) {
+#endif
 			_dmx_slots = slots;
 			//zero remainder of buffer
 		   for (int n=packetSize+18; n<ARTNET_BUFFER_MAX; n++) {
 			  _packet_buffer[n] = 0;
 		    }
 		  opcode = ARTNET_ART_DMX;
+#if defined ( NO_HTP_IS_SINGLE_SENDER )
 		}	// matched sender
-	
+#endif
 	}
 	return opcode;
 }
@@ -503,7 +506,7 @@ uint16_t LXArtNet::parse_header( void ) {
      (after first ArtDmx packet, only packets from the same sender are accepted
      until a cancel merge command is received)
 */
-uint16_t LXArtNet::parse_art_address( void ) {
+uint16_t LXArtNet::parse_art_address( UDP* wUDP ) {
    setNetAddress(_packet_buffer[12]);
 	//[14] to [31] short name <= 18 bytes
 	//[32] to [95] long name  <= 64 bytes
@@ -516,15 +519,42 @@ uint16_t LXArtNet::parse_art_address( void ) {
 	uint8_t command = _packet_buffer[106]; // command
 	switch ( command ) {
 	   case 0x01:	//cancel merge: resets ip address used to identify dmx sender
-	   	_dmx_sender =   (uint32_t)0;
-	   	_dmx_sender_b = (uint32_t)0;
-	   	break;
+		   if ( _using_htp ) {
+				if ( _dmx_sender != wUDP->remoteIP() ) {
+					_dmx_sender =   (uint32_t)0;
+					for(int k=0; k<DMX_UNIVERSE_SIZE; k++) {
+						_dmx_buffer_a[k] = 0;
+					}
+				}
+				if ( _dmx_sender_b != wUDP->remoteIP() ) {
+					_dmx_sender_b = (uint32_t)0;
+					for(int k=0; k<DMX_UNIVERSE_SIZE; k++) {
+						_dmx_buffer_b[k] = 0;
+					}
+				}
+		   } else {
+				_dmx_sender = (uint32_t)0;
+				for(int j=18; j<ARTNET_BUFFER_MAX; j++) {
+				   _packet_buffer[j] = 0;
+				}
+		   }
+		   break;
 	   case 0x90:	//clear buffer
-	   	_dmx_sender = (uint32_t)0;
-	   	for(int j=18; j<ARTNET_BUFFER_MAX; j++) {
-	   	   _packet_buffer[j] = 0;
-	   	}
-	   	_dmx_slots = 512;
+	   		if ( _using_htp ) {
+	   			_dmx_sender = (uint32_t)0;
+	   			_dmx_sender_b = (uint32_t)0;
+				for(int j=0; j<DMX_UNIVERSE_SIZE; j++) {
+				   _dmx_buffer_a[j] = 0;
+				   _dmx_buffer_b[j] = 0;
+				}
+	   			_dmx_slots = 512;
+	   		} else {
+				_dmx_sender = (uint32_t)0;
+				for(int j=18; j<ARTNET_BUFFER_MAX; j++) {
+				   _packet_buffer[j] = 0;
+				}
+				_dmx_slots = 512;
+			}
 	   	return ARTNET_ART_DMX;	// return ARTNET_ART_DMX so function calling readPacket
 	   	   						   // knows there has been a change in levels
 	   	break;

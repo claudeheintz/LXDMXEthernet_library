@@ -233,6 +233,7 @@ uint16_t LXSACN::parse_root_layer( int size ) {
 }
 
 uint16_t LXSACN::parse_framing_layer( uint16_t size ) {
+
    uint16_t tsize = size - 22;
    if ( checkFlagsAndLength(&_packet_buffer[38], tsize) ) {     // framing pdu length
      if ( _packet_buffer[43] == 0x02 ) {                        // vector dmp is 1.31
@@ -249,61 +250,150 @@ uint16_t LXSACN::parse_dmp_layer( uint16_t size ) {
   if ( checkFlagsAndLength(&_packet_buffer[115], tsize) ) {  // dmp pdu length
     if ( _packet_buffer[117] == 0x02 ) {                     // Set Property
       if ( _packet_buffer[118] == 0xa1 ) {                   // address and data format
+
         if ( _using_htp ) {
            uint16_t slots = _packet_buffer[124];      // if same sender, good dmx!
-			  slots += _packet_buffer[123] << 8;
-           copyCIDifEmpty(_dmx_sender_id);
-           if ( checkCID(_dmx_sender_id) ) {
-             _dmx_slots_a  = slots;
-				 if ( _dmx_slots_a > _dmx_slots_b ) {
-					_dmx_slots = _dmx_slots_a;
-				 } else {
-					_dmx_slots = _dmx_slots_b;
-				 }
-				 int di;
-				 int dc = _dmx_slots;
-				 int dt = 125 + 1;
-				 for (di=0; di<dc; di++) {
-					 _dmx_buffer_a[di] = _packet_buffer[dt+di];
-					if ( _dmx_buffer_a[di] > _dmx_buffer_b[di] ) {
-						_dmx_buffer_c[di] = _dmx_buffer_a[di];
-					} else {
-						_dmx_buffer_c[di] = _dmx_buffer_b[di];
+		   slots += _packet_buffer[123] << 8;
+			  
+			  
+		   // new October 2017 replace sender a if this packet has higher priority
+		   // sender b only maintained for HTP when priority is equal
+        
+		   uint8_t new_higher_priority = 0;
+		   uint8_t erase_b = 0;
+        
+		   if ( _packet_buffer[SACN_PRIORITY_OFFSET] > _priority_a ) {
+		       // packet has higher priority than a or b (b only exists if equal to a)
+		       new_higher_priority = 1;
+		       erase_b = 1;
+        	
+		   } else { // has lower or equal priority to sender a priority
+        
+		       if ( _priority_a > _packet_buffer[SACN_PRIORITY_OFFSET] ) {
+		           // lower priority packet, no need for b if this came from b
+		           if ( checkCID(_dmx_sender_id_b) ) {
+		               erase_b = 1;
+		           }
+		       }
+        	
+		       // but if haven't heard from source a for three seconds...
+		       if ( abs(millis()-_last_packet_a) > 3000 ) {
+		           // no more source a
+		           if ( _packet_buffer[SACN_PRIORITY_OFFSET] > _priority_b ) {
+		               // this packet takes over as source a if it has a higher priority than b
+		               //      (priority_b is zero if it does not exist)
+		               //      (could even be that this is a tardy packet from a)
+		               new_higher_priority = 1;
+		               erase_b = 1;
+		           } else {
+					// otherwise copy b => a, handle this packet below as if it is a new b
+				   for(int k=0; k<SACN_CID_LENGTH; k++) {
+						_dmx_sender_id[k] = _dmx_sender_id_b[k];
+						_dmx_sender_id_b[k] = 0;
 					}
-				 }			//for
-				 return 1;
-           } else {  // not matching first CID
+					for(int k=0; k<SLOTS_AND_START_CODE; k++) {
+						_dmx_buffer_a[k] = _dmx_buffer_b[k];
+						_dmx_buffer_b[k] = 0;
+					}
+					_priority_a = _priority_b;
+					_priority_b = 0;
+        			_dmx_slots_a = _dmx_slots_b;
+        			_dmx_slots_b = 0;
+        			erase_b = 0;
+		           }
+		       }
+		   }
+        
+		   if ( erase_b ) {	// b exists and is flagged to be erased
+		       if ( _dmx_slots_b ) {
+		           clearDMXSourceB();
+		       }
+		   }
+        
+		   if (( _dmx_sender_id[0] == 0  ) || new_higher_priority) {			
+		       for(int k=0; k<SACN_CID_LENGTH; k++) {		 // if _dmx_sender_id is not set
+		           _dmx_sender_id[k] = _packet_buffer[k+22];  // set it to id of this packet
+		       }
+		   }
+		   
+           if ( checkCID(_dmx_sender_id) ) {
+		       _dmx_slots_a  = slots - 1;
+		       _last_packet_a = millis();
+		       _priority_a = _packet_buffer[SACN_PRIORITY_OFFSET];
+		       
+		       // if b exists and is expired, erase it
+			   if ( _dmx_slots_b ) {
+				   if ( abs(millis()-_last_packet_b) > 3000 ) {
+					  clearDMXSourceB();
+				   }
+			   }
+		       
+		       int di;
+		       int dt = 125 + 1;
+		       if ( _priority_a == _priority_b ) {
+		           if ( _dmx_slots_a > _dmx_slots_b ) {
+						_dmx_slots = _dmx_slots_a;
+				   } else {
+						_dmx_slots = _dmx_slots_b;
+				   }
+				   for (di=0; di<_dmx_slots; di++) {
+						 _dmx_buffer_a[di] = _packet_buffer[dt+di];
+						if ( _dmx_buffer_a[di] > _dmx_buffer_b[di] ) {
+							_dmx_buffer_c[di] = _dmx_buffer_a[di];
+						} else {
+							_dmx_buffer_c[di] = _dmx_buffer_b[di];
+						}
+				   }			//for
+			   } else {
+			       _dmx_slots = _dmx_slots_a;
+			       for (di=0; di<_dmx_slots; di++) {
+						 _dmx_buffer_a[di] = _packet_buffer[dt+di];
+						 _dmx_buffer_c[di] = _dmx_buffer_a[di];
+				   }
+			   }
+		       return 1;
+           } else if ( _packet_buffer[SACN_PRIORITY_OFFSET] == _priority_a ) {
+           // if CID did not match sender_a and message has equal priority, this could be sender_b
               copyCIDifEmpty(_dmx_sender_id_b);
               if ( checkCID(_dmx_sender_id_b) ) {
-                 _dmx_slots_b  = slots;
-					  if ( _dmx_slots_a > _dmx_slots_b ) {
-						 _dmx_slots = _dmx_slots_a;
-					  } else {
-						 _dmx_slots = _dmx_slots_b;
-					  }
+                  _dmx_slots_b  = slots - 1;
+                  _last_packet_b = millis();
+                  _priority_b = _packet_buffer[SACN_PRIORITY_OFFSET];
+                  
+				  if ( _dmx_slots_a > _dmx_slots_b ) {
+					 _dmx_slots = _dmx_slots_a;
+				  } else {
+					 _dmx_slots = _dmx_slots_b;
+				  }
 
-					  int di;
-					  int dc = _dmx_slots;
-					  int dt = 125 + 1;
-					  for (di=0; di<dc; di++) {
-						 _dmx_buffer_b[di] = _packet_buffer[dt+di];
-						 if ( _dmx_buffer_a[di] > _dmx_buffer_b[di] ) {
-							_dmx_buffer_c[di] = _dmx_buffer_a[di];
-						 } else {
-							_dmx_buffer_c[di] = _dmx_buffer_b[di];
-						 }
-					  }	//for
-					  return 1;
-				  }	//matched second CID
-           }		//not first CID
+				  int di;
+				  int dc = _dmx_slots;
+				  int dt = 125 + 1;
+				  for (di=0; di<dc; di++) {
+					 _dmx_buffer_b[di] = _packet_buffer[dt+di];
+					 if ( _dmx_buffer_a[di] > _dmx_buffer_b[di] ) {
+						_dmx_buffer_c[di] = _dmx_buffer_a[di];
+					 } else {
+						_dmx_buffer_c[di] = _dmx_buffer_b[di];
+					 }
+				  }	//for
+				  return 1;
+			  }	//matched second CID
+           }		//not first CID and equal priority
         } else {	//not _using_htp
+
+#if defined ( NO_HTP_IS_SINGLE_SENDER )
+#warning NO_HTP_IS_SINGLE_SENDER NO_HTP_IS_SINGLE_SENDER NO_HTP_IS_SINGLE_SENDER NO_HTP_IS_SINGLE_SENDER
 			  copyCIDifEmpty(_dmx_sender_id);
 			  if ( checkCID(_dmx_sender_id) ) {
+#endif
 			    uint16_t slots = _packet_buffer[124];      // if same sender, good dmx!
 			    slots += _packet_buffer[123] << 8;
-			    _dmx_slots = slots;
+			    _dmx_slots = slots - 1;
 			    return 1;
+#if defined ( NO_HTP_IS_SINGLE_SENDER )
 			  }
+#endif
         }
       }
     }
@@ -322,6 +412,37 @@ uint8_t LXSACN::checkFlagsAndLength( uint8_t* flb, uint16_t size ) {
 		}
 	}
 	return 0;
+}
+
+
+void LXSACN::clearDMXOutput ( void ) {
+	for (int n=0; n<SLOTS_AND_START_CODE; n++) {
+	   _dmx_buffer_a[n] = 0;
+	   _dmx_buffer_b[n] = 0;
+	   _dmx_buffer_c[n] = 0;
+	   if ( n < SACN_CID_LENGTH ) {
+			_dmx_sender_id[n] = 0;
+			_dmx_sender_id_b[n] = 0;
+	   }
+    }
+    
+    _dmx_slots = 0;
+    _dmx_slots_a = 0;
+    _dmx_slots_b = 0;
+    _priority_a = 0;
+    _priority_b = 0;
+    _last_packet_a = 0;
+}
+
+void LXSACN::clearDMXSourceB( void ) {
+	for(int k=0; k<SACN_CID_LENGTH; k++) {
+      _dmx_sender_id_b[k] = 0;
+    }
+    for(int k=0; k<SLOTS_AND_START_CODE; k++) {
+		_dmx_buffer_b[k] = 0;
+	}
+    _dmx_slots_b = 0;
+    _priority_b = 0;
 }
 
 uint8_t LXSACN::checkCID(uint8_t* cid) {

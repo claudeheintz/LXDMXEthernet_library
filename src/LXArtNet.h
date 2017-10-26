@@ -31,7 +31,6 @@
 #define ARTNET_ART_RDM			0x8300
 #define ARTNET_NOP 				0x0000
 
-
 typedef void (*ArtNetReceiveCallback)(void);
 typedef void (*ArtNetDataRecvCallback)(uint8_t* pdata);
 
@@ -356,7 +355,7 @@ class LXArtNet : public LXDMXEthernet {
 * @brief utility for parsing ArtAddress packets
 * @return opcode in case command changes dmx data
 */
-   uint16_t  parse_art_address   ( void );
+   uint16_t  parse_art_address   ( UDP* wUDP );
    
 /*!
 * @brief utility for parsing ArtTODRequest packets

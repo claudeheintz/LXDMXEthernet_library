@@ -16,8 +16,10 @@
 
 #define SACN_PORT 0x15C0
 #define SACN_BUFFER_MAX 638
+#define SACN_PRIORITY_OFFSET 108
 #define SACN_ADDRESS_OFFSET 125
 #define SACN_CID_LENGTH 16
+#define SLOTS_AND_START_CODE 513
 
 /*!
 * @class LXSACN
@@ -151,6 +153,8 @@ class LXSACN : public LXDMXEthernet {
  */  
    void     sendDMX        ( UDP* eUDP, IPAddress to_ip );
 
+
+void clearDMXOutput ( void );
    
   private:
 /*!
@@ -192,6 +196,14 @@ class LXSACN : public LXDMXEthernet {
   	uint16_t  _dmx_slots_b;
 /// cid of second sender of an E 1.31 DMX packet
   	uint8_t _dmx_sender_id_b[16];
+/// priority of primary sender (higher than or equal to secondary)	
+  	uint8_t   _priority_a;
+/// priority of second sender (only equal to primary, less is ignored, higher becomes primary)	  	
+  	uint8_t   _priority_b;
+/// timestamp of last packet received from primary sender 	
+  	long      _last_packet_a;
+/// timestamp of last packet received from second sender 
+  	long      _last_packet_b;
 
 /*!
 * @brief checks the buffer for the sACN header and root layer size
@@ -222,6 +234,12 @@ class LXSACN : public LXDMXEthernet {
 * @brief initialize data structures
 */
    void  initialize  ( uint8_t* b );
+   
+ /*!
+ * @brief clear "b" dmx buffer and sender CID
+ */ 
+   void clearDMXSourceB( void );
+   
 };
 
 #endif // ifndef LXSACNDMX_H

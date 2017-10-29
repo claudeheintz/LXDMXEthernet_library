@@ -14,6 +14,8 @@
    The library manager does have an Ethernet2 library which supports the w5500.  To use this,
    uncomment the line to define ETHERNET_SHIELD_V2
 */
+#define ETHERNET_SHIELD_V2 1
+
 #if defined ( ETHERNET_SHIELD_V2 )
 #include <Ethernet2.h>
 #include <EthernetUdp2.h>
@@ -37,8 +39,9 @@
 
 //  Make choices here about protocol ( set to 1 to activate option )
 
-#define USE_DHCP 0
+#define USE_DHCP 1
 #define USE_SACN 0
+#define ARTNET_NODE_NAME "my Art-Net node" 
 
 //  Uncomment to use multicast, which requires extended Ethernet library
 //  see note in LXDMXEthernet.h file about method added to library
@@ -94,6 +97,11 @@ void setup() {
     
   ring.begin();                   // Initialize NeoPixel driver
   ring.show();
+  
+  if ( ! USE_SACN ) {
+   ((LXArtNet*)interface)->setNodeName(ARTNET_NODE_NAME);
+  	((LXArtNet*)interface)->send_art_poll_reply(&eUDP);
+  }
 }
 
 //*********************** main loop *******************

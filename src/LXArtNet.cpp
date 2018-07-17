@@ -189,9 +189,17 @@ uint8_t* LXArtNet::replyData( void ) {
 	return _reply_buffer;
 }
 
+char* LXArtNet::shortName( void ) {
+	return (char*)&_reply_buffer[26];
+}
+
+char* LXArtNet::longName( void ) {
+	return (char*)&_reply_buffer[44];
+}
+
 void LXArtNet::setNodeName( const char* name ) {
 	//strcpy((char*)&_reply_buffer[26], name);
-	strcpy((char*)&_reply_buffer[44], name);
+	strcpy(longName(), name);
 }
 
 uint8_t LXArtNet::readDMXPacket ( UDP* eUDP ) {

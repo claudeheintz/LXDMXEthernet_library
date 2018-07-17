@@ -184,11 +184,23 @@ class LXArtNet : public LXDMXEthernet {
  * @brief direct pointer to poll reply packet contents
  * @return uint8_t* to poll reply packet contents
  */ 
-   uint8_t* replyData      ( void );
+   uint8_t* replyData     ( void );
    
 /*!
- * @brief direct pointer to poll reply packet contents
- * @return uint8_t* to poll reply packet contents
+ * @brief direct pointer to part of poll reply packet content array storing the short name
+ * @return char* to part of poll reply array
+ */ 
+   char* shortName        ( void );
+   
+/*!
+ * @brief direct pointer to part of poll reply packet content array storing the long name
+ * @return char* to part of poll reply array
+ */ 
+   char* longName         ( void );
+   
+/*!
+ * @brief copies string into poll reply location storing the long name of the node
+ * @param char* of string to copy
  */ 
    void     setNodeName    ( const char* name );
 

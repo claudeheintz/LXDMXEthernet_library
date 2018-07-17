@@ -517,7 +517,13 @@ uint16_t LXArtNet::parse_header( void ) {
 uint16_t LXArtNet::parse_art_address( UDP* wUDP ) {
    setNetAddress(_packet_buffer[12]);
 	//[14] to [31] short name <= 18 bytes
+	if ( _packet_buffer[14] != 0 ) {
+		strcpy(shortName(), (char*)&_packet_buffer[14]);
+	}
 	//[32] to [95] long name  <= 64 bytes
+	if ( _packet_buffer[32] != 0 ) {
+		strcpy(longName(), (char*)&_packet_buffer[32]);
+	}
 	//[96][97][98][99]                  input universe   ch 1 to 4
 	//[100][101][102][103]               output universe   ch 1 to 4
 	setUniverseAddress(_packet_buffer[100]);

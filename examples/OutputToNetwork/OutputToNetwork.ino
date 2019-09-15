@@ -3,9 +3,9 @@
     @file     DMX2Ethernet.ino
     @author   Claude Heintz
     @license  BSD (see LXDMXEthernet.h)
-    @copyright 2015-2017 by Claude Heintz
+    @copyright 2019 by Claude Heintz
 
-    Example using LXDMXEthernet_Library for input from DMX to Art-Net or E1.31 sACN
+    Example using LXDMXEthernet_Library for output from Arduino to Art-Net or E1.31 sACN
     
     Art-Net(TM) Designed by and Copyright Artistic Licence Holdings Ltd.
     sACN E 1.31 is a public standard published by the PLASA technical standards program
@@ -18,8 +18,6 @@
     
     
 //*********************** includes ***********************/
-
-#include "LXArduinoDMXUSART.h"
 
 #include <SPI.h>
 
@@ -67,7 +65,7 @@
 #define USE_DHCP 1
 #define USE_SACN 1
 // comment out next line for unicast sACN
-//#define USE_MULTICAST 1
+#define USE_MULTICAST 1
 
 #define MAC_ADDRESS 0x90, 0xA2, 0xDA, 0x10, 0x6C, 0xA8
 #define IP_ADDRESS 192,168,1,20
@@ -76,12 +74,6 @@
 #define BROADCAST_IP 192,168,1,255
 // this is the IP address to which output packets are sent, unless multicast is used
 #define TARGET_IP 192,168,1,255
-
-// this sketch flashes an indicator led:
-#define LED_PIN 3
-
-// the driver direction is controlled by:
-#define RXTX_PIN 2
 
 //the Ethernet Shield has an SD card that also communicates by SPI
 //set its select pin to output to be safe:
@@ -118,25 +110,18 @@ uint8_t use_multicast = 0;
 #endif
 
 
-uint8_t led_state = 0;
+//  Modify trial_address_A and trial_address_B to control other addresses
 
-void blinkLED() {
-  if ( led_state ) {
-    digitalWrite(LED_PIN, HIGH);
-    led_state = 0;
-  } else {
-    digitalWrite(LED_PIN, LOW);
-    led_state = 1;
-  }
-}
+uint8_t trial_level = 0;
+int     trial_address_A = 1;
+int     trial_address_B = 7;
 
-int got_dmx = 0;
-void gotDMXCallback(int slots);
 IPAddress send_address;
 
 void setup() {
-  pinMode(LED_PIN, OUTPUT);  //status LED
-  blinkLED();
+  Serial.begin(115200);
+  Serial.println("Setup started");
+  
   #if defined(SDSELECT_PIN)
     pinMode(SDSELECT_PIN, OUTPUT);
   #endif
@@ -146,8 +131,6 @@ void setup() {
   } else {
   	Ethernet.begin(mac, ip, gateway, gateway, subnet_mask);   // Static
   }
-
-  blinkLED();
   
   if ( USE_SACN ) {                       // Initialize Interface (defaults to first universe)
     interface = new LXSACN();
@@ -167,9 +150,6 @@ void setup() {
     
     //((LXArtNet*)interface)->setSubnetUniverse(0, 0);  //for different subnet/universe, change this line
   }
-  
-  LXSerialDMX.setDataReceivedCallback(&gotDMXCallback);
-  LXSerialDMX.startInput();
 
   if ( use_multicast ) {
     eUDP.beginMulticast(send_address,  interface->dmxPort());
@@ -179,34 +159,23 @@ void setup() {
 
   interface->setNumberOfSlots(512);
 
-  blinkLED();
-}
-
-
-// ***************** input callback function *************
-
-void gotDMXCallback(int slots) {
-  got_dmx = slots;
+  Serial.println("Setup complete.");
 }
 
 /************************************************************************
 
-  The main loop fades the levels of addresses 7 and 8 to full
+  The main loop fades the levels of addresses A and B to full
   
 *************************************************************************/
 
 void loop() {
-  if ( got_dmx ) {
-    //interface->setNumberOfSlots(got_dmx);
-    for(int i=1; i<=got_dmx; i++) {
-      interface->setSlot(i, LXSerialDMX.getSlot(i));
-    }
-    blinkLED();
-    
-    interface->sendDMX(&eUDP, send_address);
-
-    got_dmx = 0;
-  } else {
-    digitalWrite(LED_PIN, LOW);
-  }
+  // advance the level (overflows back to zero)
+  trial_level++;
+  // set the address levels
+  interface->setSlot(trial_address_A, trial_level);
+  interface->setSlot(trial_address_B, trial_level);
+  // send the network packet
+  interface->sendDMX(&eUDP, send_address);
+  delay(25);
+  Serial.println(trial_level);
 }

@@ -16,8 +16,8 @@
 
     v1.00 - First release
     
-    
-//*********************** includes ***********************/
+*/
+/*********************** includes ***********************/
 
 #include "LXArduinoDMXUSART.h"
 
@@ -65,11 +65,11 @@
 */
 
 #define USE_DHCP 1
-#define USE_SACN 1
+#define USE_SACN 0
 // comment out next line for unicast sACN
 //#define USE_MULTICAST 1
 
-#define MAC_ADDRESS 0x90, 0xA2, 0xDA, 0x10, 0x6C, 0xA8
+#define MAC_ADDRESS 0x90, 0xA2, 0xDA, 0x0F, 0xF7, 0x61
 #define IP_ADDRESS 192,168,1,20
 #define GATEWAY_IP 192,168,1,1
 #define SUBNET_MASK 255,255,255,0
@@ -119,6 +119,7 @@ uint8_t use_multicast = 0;
 
 
 uint8_t led_state = 0;
+uint8_t loop_counter = 0;
 
 void blinkLED() {
   if ( led_state ) {
@@ -165,9 +166,12 @@ void setup() {
       send_address = IPAddress(TARGET_IP);
     #endif
     
-    //((LXArtNet*)interface)->setSubnetUniverse(0, 0);  //for different subnet/universe, change this line
+    ((LXArtNet*) interface)->setOutputFromNetworkMode(0); //disables receiving ArtDMX
+    
+    ((LXArtNet*)interface)->setSubnetUniverse(0, 0);  //for different subnet/universe, change this line
   }
   
+  LXSerialDMX.setDirectionPin(RXTX_PIN);
   LXSerialDMX.setDataReceivedCallback(&gotDMXCallback);
   LXSerialDMX.startInput();
 
@@ -177,7 +181,9 @@ void setup() {
     eUDP.begin(interface->dmxPort());
   }
 
-  interface->setNumberOfSlots(512);
+  if ( USE_SACN == 0 ) {
+    ((LXArtNet*) interface)->send_art_poll(&eUDP);
+  }
 
   blinkLED();
 }
@@ -197,15 +203,28 @@ void gotDMXCallback(int slots) {
 
 void loop() {
   if ( got_dmx ) {
-    //interface->setNumberOfSlots(got_dmx);
+    interface->setNumberOfSlots(got_dmx);
     for(int i=1; i<=got_dmx; i++) {
       interface->setSlot(i, LXSerialDMX.getSlot(i));
     }
     blinkLED();
-    
-    interface->sendDMX(&eUDP, send_address);
 
-    got_dmx = 0;
+    //interface->setNumberOfSlots(512);
+    interface->sendDMX(&eUDP, send_address);
+    
+    if ( USE_SACN == 0 ) { 
+      loop_counter++;
+      if ( loop_counter > 132 ) {
+        loop_counter = 0;
+        ((LXArtNet*) interface)->send_art_poll(&eUDP);
+      }
+    	interface->readDMXPacket(&eUDP);  // allows responding to Art-Net polls, but not ArtDMX
+    	                                  // will set interface slots to zero when an Art-Net packet is received
+    }
+
+    
+    
+    got_dmx = 0;	//wait for next serial DMX break
   } else {
     digitalWrite(LED_PIN, LOW);
   }

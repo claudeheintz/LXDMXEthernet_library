@@ -247,9 +247,11 @@ class LXArtNet : public LXDMXEthernet {
  */    
    void     sendDMX             ( UDP* eUDP, IPAddress to_ip );
    
-
-
-   
+ /*!
+ * @brief send Art-Net ArtPoll to broadcast address
+ * @param eUDP UDP* to be used for sending UDP packet
+ * @discussion does nothing if broadcast address is undefined
+ */ 
    void     send_art_poll( UDP* eUDP );
  /*!
  * @brief send ArtPoll Reply packet for dmx output from network
@@ -296,6 +298,11 @@ class LXArtNet : public LXDMXEthernet {
 	* @discussion callback has pointer to command string
 	*/
    void setArtCommandCallback(ArtNetDataRecvCallback callback);
+   
+   /*!
+	* @brief setup poll reply buffer to indicate output/input
+	*/  
+   void  setOutputFromNetworkMode  ( uint8_t can_output );
    
   private:
 /*!
@@ -400,10 +407,6 @@ class LXArtNet : public LXDMXEthernet {
 * @brief initialize poll reply buffer
 */
    void  initializePollReply  ( void );
- /*!
-* @brief setup poll reply buffer to indicate output
-*/  
-   void  setOutputFromNetworkMode  ( uint8_t can_output );
    
 };
 

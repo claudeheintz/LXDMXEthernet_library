@@ -385,26 +385,28 @@ uint16_t LXArtNet::readArtDMX ( UDP* eUDP, uint16_t slots, int packetSize ) {
 
 void LXArtNet::sendDMX ( UDP* eUDP, IPAddress to_ip ) {
    strcpy((char*)_packet_buffer, "Art-Net");
-   _packet_buffer[8] = 0;        //op code lo-hi
-   _packet_buffer[9] = 0x50;
-   _packet_buffer[10] = 0;
-   _packet_buffer[11] = 14;
-   if ( _sequence == 0 ) {
-     _sequence = 1;
-   } else {
-     _sequence++;
-   }
-   _packet_buffer[12] = _sequence;
-   _packet_buffer[13] = 0;
-   _packet_buffer[14] = _universe;
-   _packet_buffer[15] = _net;
-   _packet_buffer[16] = _dmx_slots >> 8;
-   _packet_buffer[17] = _dmx_slots & 0xFF;
-   //assume dmx data has been set
+   if ( _dmx_slots > 0 ) {
+	   _packet_buffer[8] = 0;        //op code lo-hi
+	   _packet_buffer[9] = 0x50;
+	   _packet_buffer[10] = 0;
+	   _packet_buffer[11] = 14;
+	   if ( _sequence == 0 ) {
+		 _sequence = 1;
+	   } else {
+		 _sequence++;
+	   }
+	   _packet_buffer[12] = _sequence;
+	   _packet_buffer[13] = 0;
+	   _packet_buffer[14] = _universe;
+	   _packet_buffer[15] = _net;
+	   _packet_buffer[16] = _dmx_slots >> 8;
+	   _packet_buffer[17] = _dmx_slots & 0xFF;
+	   //assume dmx data has been set
   
-   eUDP->beginPacket(to_ip, ARTNET_PORT);
-   eUDP->write(_packet_buffer, 18+_dmx_slots);
-   eUDP->endPacket();
+	   eUDP->beginPacket(to_ip, ARTNET_PORT);
+	   eUDP->write(_packet_buffer, 18+_dmx_slots);
+	   eUDP->endPacket();
+   }
 }
 
 

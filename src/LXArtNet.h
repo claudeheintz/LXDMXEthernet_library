@@ -1,5 +1,5 @@
 /* LXArtNet.h
-   Copyright 2015-2015 by Claude Heintz Design
+   Copyright 2015-2020 by Claude Heintz Design
    see LXDMXEthernet.h for license
 
 	Art-Net(TM) Designed by and Copyright Artistic Licence Holdings Ltd.
@@ -15,6 +15,7 @@
 #define ARTNET_PORT 0x1936
 #define ARTNET_BUFFER_MAX 530
 #define ARTNET_REPLY_SIZE 240
+#define ARTNET_POLL_SIZE  14
 #define ARTNET_TOD_PKT_SIZE	1228
 #define ARTNET_RDM_PKT_SIZE 281
 #define ARTNET_ADDRESS_OFFSET 17
@@ -245,6 +246,11 @@ class LXArtNet : public LXDMXEthernet {
  * @param to_ip target address
  */    
    void     sendDMX             ( UDP* eUDP, IPAddress to_ip );
+   
+
+
+   
+   void     send_art_poll( UDP* eUDP );
  /*!
  * @brief send ArtPoll Reply packet for dmx output from network
  * @discussion If broadcast address is defined by passing subnet to constructor, reply is broadcast
@@ -394,6 +400,10 @@ class LXArtNet : public LXDMXEthernet {
 * @brief initialize poll reply buffer
 */
    void  initializePollReply  ( void );
+ /*!
+* @brief setup poll reply buffer to indicate output
+*/  
+   void  setOutputFromNetworkMode  ( uint8_t can_output );
    
 };
 

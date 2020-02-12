@@ -1,5 +1,5 @@
 /* LXArtNet.cpp
-   Copyright 2015-2015 by Claude Heintz Design
+   Copyright 2015-2020 by Claude Heintz Design
    see LXDMXEthernet.h for license
    
    LXArtNet partially implements the Art-Net Ethernet Communication Standard.
@@ -254,15 +254,17 @@ uint16_t LXArtNet::readArtNetPacketContents ( UDP* eUDP, int packetSize ) {
 	switch ( opcode ) {
 		case ARTNET_ART_DMX:
 		   opcode = ARTNET_NOP;
-			// ignore protocol version [10] hi byte [11] lo byte sequence[12], physical[13]
-			if (( _packet_buffer[14] == _universe ) && ( _packet_buffer[15] == _net )) {
-				packetSize -= 18;
-				uint16_t slots = _packet_buffer[17];
-				slots += _packet_buffer[16] << 8;
-				if ( packetSize >= slots ) {					// double check we got all expected
-					opcode = readArtDMX(eUDP, slots, packetSize);      // returns ARTNET_ART_DMX
-				}
-			}   // matched universe/net
+			// ignore protocol version hi byte[10](0x00) lo byte[11](0x0e);  sequence[12]; physical[13]
+			if ( _reply_buffer[174] == 0x80 ) {
+				if (( _packet_buffer[14] == _universe ) && ( _packet_buffer[15] == _net )) {
+					packetSize -= 18;
+					int slots = _packet_buffer[17];
+					slots += _packet_buffer[16] << 8;
+					if ( packetSize >= slots ) {					// double check we got all expected
+						opcode = readArtDMX(eUDP, slots, packetSize);      // returns ARTNET_ART_DMX
+					}
+				}		// matched universe/net
+			}			// can output from network
 			break;
 		case ARTNET_ART_ADDRESS:
 			if (( packetSize >= 107 ) && ( _packet_buffer[11] >= 14 )) {  //protocol version [10] hi byte [11] lo byte
@@ -316,9 +318,9 @@ uint16_t LXArtNet::readArtDMX ( UDP* eUDP, uint16_t slots, int packetSize ) {
 			} else {
 				_dmx_slots = _dmx_slots_b;
 			}
-			int di;
-			int dc = _dmx_slots;
-			int dt = ARTNET_ADDRESS_OFFSET + 1;
+			uint16_t di;
+			uint16_t dc = _dmx_slots;
+			uint16_t dt = ARTNET_ADDRESS_OFFSET + 1;
 			  for (di=0; di<dc; di++) {
 				if ( di < slots ) {								// total slots may be greater than slots in this packet
 					_dmx_buffer_a[di] = _packet_buffer[dt+di];
@@ -343,9 +345,9 @@ uint16_t LXArtNet::readArtDMX ( UDP* eUDP, uint16_t slots, int packetSize ) {
 				} else {
 					_dmx_slots = _dmx_slots_b;
 				}
-			  int di;
-			  int dc = _dmx_slots;
-			  int dt = ARTNET_ADDRESS_OFFSET + 1;
+			  uint16_t di;
+			  uint16_t dc = _dmx_slots;
+			  uint16_t dt = ARTNET_ADDRESS_OFFSET + 1;
 			  for (di=0; di<dc; di++) {
 				if ( di < slots ) {								//total slots may be greater than slots in this packet				
 					_dmx_buffer_b[di] = _packet_buffer[dt+di];
@@ -405,6 +407,33 @@ void LXArtNet::sendDMX ( UDP* eUDP, IPAddress to_ip ) {
    eUDP->endPacket();
 }
 
+
+void LXArtNet::send_art_poll( UDP* eUDP ) {
+   IPAddress a = _broadcast_address;
+   if ( a != INADDR_NONE ) {
+      // modify _reply_buffer for poll content (replace opcode...)
+      _reply_buffer[8] = 0;        // op code lo-hi
+      _reply_buffer[9] = 0x20;
+      _reply_buffer[10] = 0;	//Protocol version hi
+      _reply_buffer[11] = 14;   //low, current version as of Art-Net 4 is 14 (0x0e)
+      _reply_buffer[12] = 0;	//talk options
+      _reply_buffer[13] = 0;	//priority of diagnostics
+   
+      eUDP->beginPacket(a, ARTNET_PORT);
+      eUDP->write(_reply_buffer, ARTNET_POLL_SIZE);
+      eUDP->endPacket();
+      
+      // return _reply_buffer to poll reply contents
+      _reply_buffer[8] = 0;        // op code lo-hi
+      _reply_buffer[9] = 0x21;
+      _reply_buffer[10] = ((uint32_t)_my_address) & 0xff;      //ip address
+      _reply_buffer[11] = ((uint32_t)_my_address) >> 8;
+      _reply_buffer[12] = ((uint32_t)_my_address) >> 16;
+      _reply_buffer[13] = ((uint32_t)_my_address) >> 24;
+   }
+  
+}
+
 /*
   sends ArtDMX packet to UDP object's remoteIP if to_ip is not specified
   ( remoteIP is set when parsePacket() is called )
@@ -427,7 +456,7 @@ void LXArtNet::send_art_poll_reply( UDP* eUDP ) {
 void LXArtNet::send_art_tod ( UDP* wUDP, uint8_t* todata, uint8_t ucount ) {
 	if ( ! (_broadcast_address == INADDR_NONE) ) {
 		uint8_t _buffer[ARTNET_TOD_PKT_SIZE];
-		int i;
+		uint16_t i;
 		for ( i=0; i < ARTNET_TOD_PKT_SIZE; i++ ) {
 			_buffer[i] = 0;
 		}
@@ -462,7 +491,7 @@ void LXArtNet::send_art_tod ( UDP* wUDP, uint8_t* todata, uint8_t ucount ) {
 
 void LXArtNet::send_art_rdm ( UDP* wUDP, uint8_t* rdmdata, IPAddress toa ) {
 	uint8_t _buffer[ARTNET_RDM_PKT_SIZE];
-	int i;
+	uint16_t i;
 	for ( i=0; i < ARTNET_RDM_PKT_SIZE; i++ ) {
 		_buffer[i] = 0;
 	}
@@ -518,12 +547,13 @@ uint16_t LXArtNet::parse_art_address( UDP* wUDP ) {
    setNetAddress(_packet_buffer[12]);
 	//[14] to [31] short name <= 18 bytes
 	if ( _packet_buffer[14] != 0 ) {
-		strcpy(shortName(), (char*)&_packet_buffer[14]);
-	}
+		strcpy(shortName(), (char*)&_packet_buffer[14]);		//no length check!
+	}										//shortName() points to reply buffer
 	//[32] to [95] long name  <= 64 bytes
 	if ( _packet_buffer[32] != 0 ) {
-		strcpy(longName(), (char*)&_packet_buffer[32]);
-	}
+		strcpy(longName(), (char*)&_packet_buffer[32]);		//no length check!
+	}										//longName() points to reply buffer
+	
 	//[96][97][98][99]                  input universe   ch 1 to 4
 	//[100][101][102][103]               output universe   ch 1 to 4
 	setUniverseAddress(_packet_buffer[100]);
@@ -652,7 +682,18 @@ void  LXArtNet::initializePollReply  ( void ) {
   strcpy((char*)&_reply_buffer[26], "ArduinoDMX");
   strcpy((char*)&_reply_buffer[44], "ArduinoDMX");
   _reply_buffer[173] = 1;    // number of ports
-  _reply_buffer[174] = 0x80;  // can output from network
-  _reply_buffer[182] = 0x80;  //  good output... change if error
+  setOutputFromNetworkMode(1);
   _reply_buffer[190] = _universe;
+}
+
+void  LXArtNet::setOutputFromNetworkMode  ( uint8_t can_output ) {
+  if ( can_output ) {
+     _reply_buffer[174] = 0x80;  // can output from network
+     _reply_buffer[182] = 0x80;  // good output 			//should be updated as needed
+     _reply_buffer[178] = 0x08;  // input disabled
+  } else {
+     _reply_buffer[174] = 0x40;  // can input to network
+     _reply_buffer[182] = 0x00;  // no output
+     _reply_buffer[178] = 0x80;  // data received 			//should be updated as needed
+  }
 }

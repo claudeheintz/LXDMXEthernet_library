@@ -92,7 +92,7 @@ TX |----------------------| 4 DI   Gnd 5 |---+------------ Pin 1
 
 //#define USE_MULTICAST 1
 
-#define MAC_ADDRESS 0x90, 0xA2, 0xDA, 0x10, 0x6C, 0xA8
+#define MAC_ADDRESS 0x90, 0xA2, 0xDA, 0x0F, 0xF7, 0x61
 #define IP_ADDRESS 192,168,1,20
 #define GATEWAY_IP 192,168,1,1
 #define SUBNET_MASK 255,255,255,0

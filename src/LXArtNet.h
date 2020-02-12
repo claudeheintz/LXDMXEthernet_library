@@ -300,6 +300,12 @@ class LXArtNet : public LXDMXEthernet {
    void setArtCommandCallback(ArtNetDataRecvCallback callback);
    
    /*!
+	* @brief function callback when ArtPollReply is received
+	* @discussion callback has pointer to packet data
+	*/
+   void setArtPollReplyCallback(ArtNetDataRecvCallback callback);
+   
+   /*!
 	* @brief setup poll reply buffer to indicate output/input
 	*/  
    void  setOutputFromNetworkMode  ( uint8_t can_output );
@@ -370,6 +376,11 @@ class LXArtNet : public LXDMXEthernet {
     * @brief Pointer to art Command packet received callback function
    */
   	ArtNetDataRecvCallback _art_cmd_callback;
+  	
+  	/*!
+    * @brief Pointer to art poll reply received callback function
+   */
+  	ArtNetDataRecvCallback _art_poll_reply_callback;
 
 /*!
 * @brief checks packet for "Art-Net" header
@@ -402,6 +413,11 @@ class LXArtNet : public LXDMXEthernet {
 * @brief initialize data structures
 */
    void  initialize  ( uint8_t* b );
+
+/*!
+* @brief calls art_poll_reply_callback
+*/     
+   uint16_t parse_art_poll_reply( UDP* wUDP );
    
 /*!
 * @brief initialize poll reply buffer

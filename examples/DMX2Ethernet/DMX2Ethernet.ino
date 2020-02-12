@@ -69,7 +69,7 @@
 // comment out next line for unicast sACN
 //#define USE_MULTICAST 1
 
-#define MAC_ADDRESS 0x90, 0xA2, 0xDA, 0x0F, 0xF7, 0x61
+#define MAC_ADDRESS 0x90, 0xA2, 0xDA, 0x0F, 0xF7, 0x6D
 #define IP_ADDRESS 192,168,1,20
 #define GATEWAY_IP 192,168,1,1
 #define SUBNET_MASK 255,255,255,0
@@ -167,7 +167,7 @@ void setup() {
     #endif
     
     ((LXArtNet*) interface)->setOutputFromNetworkMode(0); //disables receiving ArtDMX
-    
+    ((LXArtNet*) interface)->setArtPollReplyCallback(&gotPollReplyCallback);
     ((LXArtNet*)interface)->setSubnetUniverse(0, 0);  //for different subnet/universe, change this line
   }
   
@@ -193,6 +193,15 @@ void setup() {
 
 void gotDMXCallback(int slots) {
   got_dmx = slots;
+}
+
+
+// ***************** Art-poll reply callback function *************
+
+void gotPollReplyCallback(uint8_t* packet) {
+  if ( packet[174] & 0x80 ) { //1st port can output from network 
+    send_address = IPAddress(packet[10], packet[11], packet[12], packet[13]);
+  }
 }
 
 /************************************************************************

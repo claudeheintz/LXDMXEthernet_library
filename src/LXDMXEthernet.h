@@ -43,6 +43,10 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 //#define NO_HTP_IS_SINGLE_SENDER 1
 
+#ifndef INADDR_NONE
+	#define INADDR_NONE IPAddress(0, 0, 0, 0)
+#endif
+
 /*!   
 @class LXDMXEthernet
 @abstract
